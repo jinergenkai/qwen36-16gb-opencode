@@ -1,0 +1,13 @@
+# Large / third-party downloads (fetched by download-all.ps1 or from llama.cpp releases)
+models/
+llama.cpp/
+templates/
+*.gguf
+.cache/
+
+# Logs and scratch
+*.log
+!bench/results/bench.log
+bench/results/*/server.log
+bench/results/*/T*_*/
+__pycache__/

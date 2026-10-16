@@ -1,0 +1,20 @@
+Đã tạo `parse_log.py` và chạy thành công. Kết quả đếm số dòng ERROR theo module:
+
+```json
+{"api": 19, "auth": 16, "cache": 23, "db": 23}
+```
+
+Regex dùng để parse:
+- `^\S+\s+\[ERROR\]\s+module=(\S+)\s+msg="((?:[^"\\]|\\.)*)"` — khớp timestamp, level `ERROR`, trích `module` (group 1), và `msg` (group 2) với hỗ trợ escaped quote (`\"`) và backslash (`\\`).
+
+> build · qwen36-uncensored-q4
+
+✱ Glob "app.log" 1 match
+→ Read app.log
+
+← Write parse_log.py
+Wrote file successfully.
+
+$ python parse_log.py
+{"api": 19, "auth": 16, "cache": 23, "db": 23}
+

@@ -1,0 +1,33 @@
+[15:29:49] === q4 (qwen36-uncensored-q4) ===
+[15:30:54]   loaded in 61s  {'vram_used_mib': 14641, 'server_ram_mib': 14565, 'available_ram_mib': 12223}
+[15:31:04]   speed @ 4871 tok: prefill 1546.9 t/s, decode 45.9 t/s
+[15:31:36]   speed @ 41594 tok: prefill 1729.2 t/s, decode 41.6 t/s
+[15:34:04]   speed @ 173659 tok: prefill 1265.1 t/s, decode 29.0 t/s
+[15:35:12]   T1_read: PASS in 68s  
+[15:36:30]   T2_write_regex: PASS in 78s  
+[15:37:34]   T3_bugfix: PASS in 63s  
+[15:39:40]   T4_feature: PASS in 126s  
+[15:43:45]   T5_long_ctx: PASS in 245s  
+[15:43:50] === orig (qwen36-original-q4) ===
+[15:44:55]   loaded in 61s  {'vram_used_mib': 14581, 'server_ram_mib': 13591, 'available_ram_mib': 13675}
+[15:45:05]   speed @ 4871 tok: prefill 1686.4 t/s, decode 45.2 t/s
+[15:45:35]   speed @ 41594 tok: prefill 1897.5 t/s, decode 41.2 t/s
+[15:47:55]   speed @ 173659 tok: prefill 1346.5 t/s, decode 28.2 t/s
+[15:49:12]   T1_read: PASS in 78s  
+[15:50:39]   T2_write_regex: PASS in 87s  
+[15:51:54]   T3_bugfix: PASS in 74s  
+[15:54:18]   T4_feature: FAIL in 145s  ---------------------------------------------
+Traceback (most recent call last):
+  File "E:\llm\bench\results\orig\T4_feature\hidden_test.py", line 23
+[15:57:42]   T5_long_ctx: PASS in 204s  
+[15:57:47] === q5 (qwen36-uncensored-q5) ===
+[15:59:02]   loaded in 71s  {'vram_used_mib': 14542, 'server_ram_mib': 19028, 'available_ram_mib': 8159}
+[15:59:16]   speed @ 4871 tok: prefill 767.0 t/s, decode 40.5 t/s
+[16:00:06]   speed @ 41593 tok: prefill 995.7 t/s, decode 36.3 t/s
+[16:03:47]   speed @ 173659 tok: prefill 831.2 t/s, decode 26.2 t/s
+[16:05:03]   T1_read: PASS in 76s  
+[16:06:56]   T2_write_regex: PASS in 113s  
+[16:08:39]   T3_bugfix: PASS in 103s  
+[16:12:01]   T4_feature: PASS in 201s  
+[16:29:53]   T5_long_ctx: PASS in 1072s  
+[16:29:57] === DONE ===

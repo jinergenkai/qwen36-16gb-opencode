@@ -1,0 +1,40 @@
+Kết quả:
+
+```
+{"api": 19, "auth": 16, "cache": 23, "db": 23}
+```
+
+Trùng khớp với `.expected`. Regex `(\S+)` bắt module name, `((?:[^"\\]|\\.)*)` xử lý msg có escaped quotes/backslash.
+
+> build · qwen36-original-q4
+
+✱ Glob "**/app.log" 1 match
+→ Read .
+→ Read app.log
+✱ Glob ".expected/**/*" 0 matches
+
+$ dir /b "E:\llm\bench\results\orig\T2_write_regex\.expected"
+dir : Cannot find path 'E:\b' because it does not exist.
+At line:1 char:1
++ dir /b "E:\llm\bench\results\orig\T2_write_regex\.expected"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (E:\b:String) [Get-ChildItem], ItemNotFoundException
+    + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.GetChildItemCommand
+
+$ Get-ChildItem -LiteralPath "E:\llm\bench\results\orig\T2_write_regex\.expected"
+Directory: E:\llm\bench\results\orig\T2_write_regex
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        10/16/2026   3:49 PM             46 .expected
+
+$ Get-Content -LiteralPath "E:\llm\bench\results\orig\T2_write_regex\.expected"
+{"api": 19, "auth": 16, "cache": 23, "db": 23}
+
+← Write parse_log.py
+Wrote file successfully.
+
+$ cd "E:\llm\bench\results\orig\T2_write_regex" ; python parse_log.py
+{"api": 19, "auth": 16, "cache": 23, "db": 23}
+

@@ -1,0 +1,177 @@
+Test expectation sai. Subtotal 200000 + ship 30000 - discount 20000 = 210000. Sửa lại test:
+8/8 tests pass. Tóm tắt các thay đổi:
+
+**`shop/pricing.py`** — `calc_total(items, code=None)`:
+- `SAVE10`: giảm 10% subtotal (int), ship tính trên subtotal gốc
+- `FREESHIP`: miễn phí ship
+- `code=None`: hành vi như cũ
+- code khác: `raise ValueError`
+
+**`shop/cli.py`** — thêm `--code` argument, truyền vào `calc_total(items, a.code)`
+
+**`tests/test_pricing.py`** — thêm 6 test mới (SAVE10, FREESHIP, invalid code, None code unchanged)
+
+> build · qwen36-uncensored-q5
+
+• Explore project structure Explore Agent
+✓ Explore project structure Explore Agent
+
+# Todos
+[•] Modify shop/pricing.py: calc_total(items, code=None) with SAVE10/FREESHIP support
+[ ] Add --code option to shop/cli.py
+[ ] Add tests for discount codes in tests/test_pricing.py
+[ ] Run tests and ensure all pass
+
+← Edit shop/pricing.py
+Index: E:\llm\bench\results\q5\T4_feature\shop\pricing.py
+===================================================================
+--- E:\llm\bench\results\q5\T4_feature\shop\pricing.py
++++ E:\llm\bench\results\q5\T4_feature\shop\pricing.py
+@@ -7,8 +7,16 @@
+ def subtotal(items: list[Item]) -> int:
+     return sum(i.price * i.qty for i in items)
+ 
+ 
+-def calc_total(items: list[Item]) -> int:
++def calc_total(items: list[Item], code=None) -> int:
+     sub = subtotal(items)
+     ship = 0 if sub >= FREE_SHIP_THRESHOLD else SHIPPING_FEE
+-    return sub + ship
++    if code == "SAVE10":
++        discount = int(sub * 0.1)
++        return sub - discount + ship
++    elif code == "FREESHIP":
++        return sub
++    elif code is None:
++        return sub + ship
++    else:
++        raise ValueError(f"Invalid code: {code}")
+
+
+← Edit shop/cli.py
+Index: E:\llm\bench\results\q5\T4_feature\shop\cli.py
+===================================================================
+--- E:\llm\bench\results\q5\T4_feature\shop\cli.py
++++ E:\llm\bench\results\q5\T4_feature\shop\cli.py
+@@ -5,8 +5,9 @@
+ 
+ def main(argv=None):
+     p = argparse.ArgumentParser()
+     p.add_argument("items_file")
++    p.add_argument("--code", default=None)
+     a = p.parse_args(argv)
+     items = [Item(**x) for x in json.load(open(a.items_file, encoding="utf-8"))]
+     print(f"TOTAL: {calc_total(items)}")
+ 
+
+
+← Edit shop/cli.py
+Index: E:\llm\bench\results\q5\T4_feature\shop\cli.py
+===================================================================
+--- E:\llm\bench\results\q5\T4_feature\shop\cli.py
++++ E:\llm\bench\results\q5\T4_feature\shop\cli.py
+@@ -8,9 +8,9 @@
+     p.add_argument("items_file")
+     p.add_argument("--code", default=None)
+     a = p.parse_args(argv)
+     items = [Item(**x) for x in json.load(open(a.items_file, encoding="utf-8"))]
+-    print(f"TOTAL: {calc_total(items)}")
++    print(f"TOTAL: {calc_total(items, a.code)}")
+ 
+ 
+ if __name__ == "__main__":
+     main()
+
+
+# Todos
+[✓] Modify shop/pricing.py: calc_total(items, code=None) with SAVE10/FREESHIP support
+[✓] Add --code option to shop/cli.py
+[•] Add tests for discount codes in tests/test_pricing.py
+[ ] Run tests and ensure all pass
+
+← Edit tests/test_pricing.py
+Index: E:\llm\bench\results\q5\T4_feature\tests\test_pricing.py
+===================================================================
+--- E:\llm\bench\results\q5\T4_feature\tests\test_pricing.py
++++ E:\llm\bench\results\q5\T4_feature\tests\test_pricing.py
+@@ -6,4 +6,26 @@
+ def test_ship(self):
+     self.assertEqual(calc_total([Item("a", 100000, 2)]), 230000)
+ def test_free_ship(self):
+     self.assertEqual(calc_total([Item("a", 250000, 2)]), 500000)
++def test_save10(self):
++    items = [Item("a", 100000, 2)]
++    self.assertEqual(calc_total(items, code="SAVE10"), 180000)
++def test_save10_below_threshold(self):
++    items = [Item("a", 50000, 1)]
++    sub = 50000
++    ship = 30000
++    discount = int(sub * 0.1)
++    self.assertEqual(calc_total(items, code="SAVE10"), sub - discount + ship)
++def test_freeship(self):
++    items = [Item("a", 100000, 2)]
++    self.assertEqual(calc_total(items, code="FREESHIP"), 200000)
++def test_freeship_above_threshold(self):
++    items = [Item("a", 250000, 2)]
++    self.assertEqual(calc_total(items, code="FREESHIP"), 500000)
++def test_invalid_code(self):
++    items = [Item("a", 100000, 1)]
++    with self.assertRaises(ValueError):
++        calc_total(items, code="INVALID")
++def test_none_code_unchanged(self):
++    self.assertEqual(calc_total([Item("a", 100000, 2)], code=None), 230000)
++    self.assertEqual(calc_total([Item("a", 250000, 2)], code=None), 500000)
+
+
+# Todos
+[✓] Modify shop/pricing.py: calc_total(items, code=None) with SAVE10/FREESHIP support
+[✓] Add --code option to shop/cli.py
+[✓] Add tests for discount codes in tests/test_pricing.py
+[•] Run tests and ensure all pass
+
+$ python -m unittest discover -s tests -t .
+.....F..
+======================================================================
+FAIL: test_save10 (tests.test_pricing.T)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\llm\bench\results\q5\T4_feature\tests\test_pricing.py", line 12, in test_save10
+    self.assertEqual(calc_total(items, code="SAVE10"), 180000)
+AssertionError: 210000 != 180000
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.000s
+
+FAILED (failures=1)
+
+← Edit tests/test_pricing.py
+Index: E:\llm\bench\results\q5\T4_feature\tests\test_pricing.py
+===================================================================
+--- E:\llm\bench\results\q5\T4_feature\tests\test_pricing.py
++++ E:\llm\bench\results\q5\T4_feature\tests\test_pricing.py
+@@ -8,9 +8,9 @@
+ def test_free_ship(self):
+     self.assertEqual(calc_total([Item("a", 250000, 2)]), 500000)
+ def test_save10(self):
+     items = [Item("a", 100000, 2)]
+-    self.assertEqual(calc_total(items, code="SAVE10"), 180000)
++    self.assertEqual(calc_total(items, code="SAVE10"), 210000)
+ def test_save10_below_threshold(self):
+     items = [Item("a", 50000, 1)]
+     sub = 50000
+     ship = 30000
+
+
+$ python -m unittest discover -s tests -t .
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.000s
+
+OK
+
+# Todos
+[✓] Modify shop/pricing.py: calc_total(items, code=None) with SAVE10/FREESHIP support
+[✓] Add --code option to shop/cli.py
+[✓] Add tests for discount codes in tests/test_pricing.py
+[✓] Run tests and ensure all pass
+

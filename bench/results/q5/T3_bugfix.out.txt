@@ -1,0 +1,128 @@
+3 bugs found. Fixing all:
+
+1. **`add`** — overwrites instead of accumulating
+2. **`remove`** — doesn't delete key when qty reaches 0 (condition `< 0` should be `<= 0`)
+3. **`low_stock`** — uses `<` instead of `<=` for threshold (test expects inclusive)
+5/5 tests pass. Sửa 3 bug trong `inventory.py`:
+
+| Bug | Dòng | Sửa |
+|-----|------|-----|
+| `add` ghi đè thay vì cộng dồn | 8 | `self.items[sku] = self.items.get(sku, 0) + qty` |
+| `remove` không xóa key khi qty = 0 | 15 | `<= 0` thay vì `< 0` |
+| `low_stock` so sánh `<` thay vì `<=` | 22 | `q <= threshold` |
+
+> build · qwen36-uncensored-q5
+
+→ Read .
+→ Read inventory.py
+→ Read test_inventory.py
+
+$ python -m unittest -v
+test_add_accumulates (test_inventory.T) ... FAIL
+test_low_stock_inclusive (test_inventory.T) ... FAIL
+test_remove_to_zero_deletes (test_inventory.T) ... FAIL
+test_remove_too_much (test_inventory.T) ... ok
+test_total (test_inventory.T) ... ok
+
+======================================================================
+FAIL: test_add_accumulates (test_inventory.T)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\llm\bench\results\q5\T3_bugfix\test_inventory.py", line 7, in test_add_accumulates
+    self.assertEqual(inv.items["a"], 5)
+AssertionError: 3 != 5
+
+======================================================================
+FAIL: test_low_stock_inclusive (test_inventory.T)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\llm\bench\results\q5\T3_bugfix\test_inventory.py", line 16, in test_low_stock_inclusive
+    self.assertEqual(inv.low_stock(5), ["a", "c"])
+AssertionError: Lists differ: ['c'] != ['a', 'c']
+
+First differing element 0:
+'c'
+'a'
+
+Second list contains 1 additional elements.
+First extra element 1:
+'c'
+
+- ['c']
++ ['a', 'c']
+
+======================================================================
+FAIL: test_remove_to_zero_deletes (test_inventory.T)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\llm\bench\results\q5\T3_bugfix\test_inventory.py", line 10, in test_remove_to_zero_deletes
+    self.assertNotIn("a", inv.items)
+AssertionError: 'a' unexpectedly found in {'a': 0}
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+FAILED (failures=3)
+
+← Edit inventory.py
+Index: E:\llm\bench\results\q5\T3_bugfix\inventory.py
+===================================================================
+--- E:\llm\bench\results\q5\T3_bugfix\inventory.py
++++ E:\llm\bench\results\q5\T3_bugfix\inventory.py
+@@ -4,9 +4,9 @@
+ 
+ def add(self, sku, qty):
+     if qty <= 0:
+         raise ValueError("qty must be positive")
+-    self.items[sku] = qty
++    self.items[sku] = self.items.get(sku, 0) + qty
+ 
+ def remove(self, sku, qty):
+     have = self.items.get(sku, 0)
+     if qty > have:
+
+
+← Edit inventory.py
+Index: E:\llm\bench\results\q5\T3_bugfix\inventory.py
+===================================================================
+--- E:\llm\bench\results\q5\T3_bugfix\inventory.py
++++ E:\llm\bench\results\q5\T3_bugfix\inventory.py
+@@ -11,9 +11,9 @@
+     have = self.items.get(sku, 0)
+     if qty > have:
+         raise ValueError("not enough stock")
+     self.items[sku] = have - qty
+-    if self.items[sku] < 0:
++    if self.items[sku] <= 0:
+         del self.items[sku]
+ 
+ def total(self):
+     return sum(self.items.values())
+
+
+← Edit inventory.py
+Index: E:\llm\bench\results\q5\T3_bugfix\inventory.py
+===================================================================
+--- E:\llm\bench\results\q5\T3_bugfix\inventory.py
++++ E:\llm\bench\results\q5\T3_bugfix\inventory.py
+@@ -18,5 +18,5 @@
+ def total(self):
+     return sum(self.items.values())
+ 
+ def low_stock(self, threshold):
+-    return sorted(s for s, q in self.items.items() if q < threshold)
++    return sorted(s for s, q in self.items.items() if q <= threshold)
+
+
+$ python -m unittest -v
+test_add_accumulates (test_inventory.T) ... ok
+test_low_stock_inclusive (test_inventory.T) ... ok
+test_remove_to_zero_deletes (test_inventory.T) ... ok
+test_remove_too_much (test_inventory.T) ... ok
+test_total (test_inventory.T) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.000s
+
+OK
+

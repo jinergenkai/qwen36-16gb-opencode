@@ -1,0 +1,41 @@
+Đã đọc xong cả 24 file. Trả lời 3 câu hỏi:
+
+1. **Hằng số `RETRY_BACKOFF_MS`** được định nghĩa ở **`part01.py`**, giá trị là **7350**.
+
+2. Hàm trong **`part17.py`** gọi `reconcile_ledger` là **`close_monthly_books`** (dòng 212).
+
+3. **`reconcile_ledger`** được định nghĩa ở **`part09.py`** (dòng 424):
+   ```python
+   def reconcile_ledger(total, rows):
+       return round(total, 2)
+   ```
+
+> build · qwen36-uncensored-q4
+
+→ Read docs/part01.py
+→ Read docs/part02.py
+→ Read docs/part03.py
+→ Read docs/part04.py
+→ Read docs/part05.py
+→ Read docs/part06.py
+→ Read docs/part07.py
+→ Read docs/part08.py
+→ Read docs/part09.py
+→ Read docs/part10.py
+→ Read docs/part11.py
+→ Read docs/part12.py
+→ Read docs/part13.py
+→ Read docs/part14.py
+→ Read docs/part15.py
+→ Read docs/part16.py
+→ Read docs/part17.py
+→ Read docs/part18.py
+→ Read docs/part19.py
+→ Read docs/part20.py
+→ Read docs/part21.py
+→ Read docs/part22.py
+→ Read docs/part23.py
+→ Read docs/part24.py
+✱ Grep "RETRY_BACKOFF_MS" in docs · 1 match
+✱ Grep "reconcile_ledger" in docs · 2 matches
+→ Read docs/part17.py [offset=205, limit=15]

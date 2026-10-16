@@ -1,0 +1,8 @@
+- **Mã bí mật deploy:** `ZEBRA-4471`
+- **Môi trường:** Staging
+
+> build · qwen36-uncensored-q5
+
+✱ Glob "notes/**/*" 3 matches
+→ Read notes
+→ Read notes/deploy.md

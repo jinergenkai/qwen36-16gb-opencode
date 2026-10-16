@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "llama.cpp": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "llama-server (local)",
+      "options": { "baseURL": "http://127.0.0.1:8080/v1" },
+      "models": {
+        "qwen36-uncensored-q4": {
+          "name": "Qwen3.6 35B Uncensored Q4_K_P",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": { "context": 262144, "output": 32768 }
+        },
+        "qwen36-uncensored-q5": {
+          "name": "Qwen3.6 35B Uncensored Q5_K_P",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": { "context": 262144, "output": 32768 }
+        },
+        "qwen36-original-q4": {
+          "name": "Qwen3.6 35B Original UD-Q4_K_XL",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": { "context": 262144, "output": 32768 }
+        }
+      }
+    }
+  },
+  "model": "llama.cpp/qwen36-uncensored-q4"
+}

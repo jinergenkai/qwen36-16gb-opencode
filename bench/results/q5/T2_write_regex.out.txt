@@ -1,0 +1,44 @@
+Script tạo và kết quả:
+
+```json
+{"api": 19, "auth": 16, "cache": 23, "db": 23}
+```
+
+**Tóm tắt:**
+- `parse_log.py` đã được tạo, dùng regex `^\S+ \[(ERROR)\] module=(\S+) msg="(.*)"` để khớp dòng ERROR và trích module
+- Kết quả đếm 81 dòng ERROR: **api=19, auth=16, cache=23, db=23**
+- In đúng 1 dòng JSON với `sort_keys=True`
+
+> build · qwen36-uncensored-q5
+
+✱ Glob "**/app.log" in . · 1 match
+→ Read app.log
+
+← Write parse_log.py
+Wrote file successfully.
+
+$ python parse_log.py
+{"api": 19, "auth": 16, "cache": 23, "db": 23}
+
+$ findstr /C:"[ERROR]" app.log | findstr /C:"module=api" | find /c /v "" & findstr /C:"[ERROR]" app.log | findstr /C:"module=auth" | find /c /v "" & findstr /C:"[ERROR]" app.log | findstr /C:"module=cache" | find /c /v "" & findstr /C:"[ERROR]" app.log | findstr /C:"module=db" | find /c /v ""
+At line:1 char:72
++ ... "[ERROR]" app.log | findstr /C:"module=api" | find /c /v "" & findstr ...
++                                                                 ~
+The ampersand (&) character is not allowed. The & operator is reserved for future use; wrap an ampersand in double 
+quotation marks ("&") to pass it as part of a string.
+At line:1 char:146
++ ... [ERROR]" app.log | findstr /C:"module=auth" | find /c /v "" & findstr ...
++                                                                 ~
+The ampersand (&) character is not allowed. The & operator is reserved for future use; wrap an ampersand in double 
+quotation marks ("&") to pass it as part of a string.
+At line:1 char:221
++ ... ERROR]" app.log | findstr /C:"module=cache" | find /c /v "" & findstr ...
++                                                                 ~
+The ampersand (&) character is not allowed. The & operator is reserved for future use; wrap an ampersand in double 
+quotation marks ("&") to pass it as part of a string.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : AmpersandNotAllowed
+
+$ Select-String -Path app.log -Pattern '\[ERROR\].*module=api' | Measure-Object | Select-Object -ExpandProperty Count
+19
+

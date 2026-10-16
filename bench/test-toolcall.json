@@ -1,0 +1,19 @@
+{
+  "model": "qwen36-uncensored-q4",
+  "messages": [{"role": "user", "content": "Tạo file fib.py in ra 10 số Fibonacci đầu tiên."}],
+  "tools": [{
+    "type": "function",
+    "function": {
+      "name": "write_file",
+      "description": "Ghi nội dung vào file",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string"},
+          "content": {"type": "string"}
+        },
+        "required": ["path", "content"]
+      }
+    }
+  }]
+}
