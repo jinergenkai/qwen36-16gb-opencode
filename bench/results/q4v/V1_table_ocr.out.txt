@@ -1,0 +1,20 @@
+Đã tạo `order.json` thành công.
+
+**Tổng tiền đơn hàng:**
+
+| Sản phẩm | Đơn giá | SL | Thành tiền |
+|---|---|---|---|
+| Áo thun cổ tròn | 189.000 | 2 | 378.000 |
+| Quần jean slim | 459.000 | 1 | 459.000 |
+| Mũ lưỡi trai | 99.000 | 3 | 297.000 |
+| Giày thể thao | 1.250.000 | 1 | 1.250.000 |
+| Tất cổ ngắn | 25.000 | 6 | 150.000 |
+| Balo chống nước | 535.000 | 1 | 535.000 |
+
+**Tổng cộng: 3.069.000 VND**
+
+> build · qwen36-uncensored-q4
+
+← Write order.json
+Wrote file successfully.
+

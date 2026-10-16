@@ -1,0 +1,79 @@
+{
+  "load_s": 61,
+  "mem_after_load": {
+    "vram_used_mib": 14581,
+    "server_ram_mib": 13591,
+    "available_ram_mib": 13675
+  },
+  "speed": [
+    {
+      "depth": 4871,
+      "prefill_tps": 1686.4,
+      "decode_tps": 45.2,
+      "wall_s": 8.5,
+      "vram_used_mib": 14705,
+      "server_ram_mib": 13982,
+      "available_ram_mib": 13257
+    },
+    {
+      "depth": 41594,
+      "prefill_tps": 1897.5,
+      "decode_tps": 41.2,
+      "wall_s": 28.2,
+      "vram_used_mib": 14710,
+      "server_ram_mib": 14229,
+      "available_ram_mib": 13025
+    },
+    {
+      "depth": 173659,
+      "prefill_tps": 1346.5,
+      "decode_tps": 28.2,
+      "wall_s": 138.3,
+      "vram_used_mib": 14712,
+      "server_ram_mib": 14869,
+      "available_ram_mib": 12204
+    }
+  ],
+  "tasks": [
+    {
+      "task": "T1_read",
+      "pass": true,
+      "seconds": 78,
+      "detail": "",
+      "tool_lines": 4
+    },
+    {
+      "task": "T2_write_regex",
+      "pass": true,
+      "seconds": 87,
+      "detail": "got={'api': 19, 'auth': 16, 'cache': 23, 'db': 23} exp={'api': 19, 'auth': 16, 'cache': 23, 'db': 23}",
+      "tool_lines": 9
+    },
+    {
+      "task": "T3_bugfix",
+      "pass": true,
+      "seconds": 74,
+      "detail": ".....\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nOK\n",
+      "tool_lines": 8
+    },
+    {
+      "task": "T4_feature",
+      "pass": false,
+      "seconds": 145,
+      "detail": "---------------------------------------------\nTraceback (most recent call last):\n  File \"E:\\llm\\bench\\results\\orig\\T4_feature\\hidden_test.py\", line 23, in test_cli\n    self.assertIn(\"TOTAL: 345000\", o)   # 350000*0.9=315000 + ship 30000\nAssertionError: 'TOTAL: 345000' not found in ''\n\n----------------------------------------------------------------------\nRan 6 tests in 0.145s\n\nFAILED (failures=1)\n",
+      "tool_lines": 13
+    },
+    {
+      "task": "T5_long_ctx",
+      "pass": true,
+      "seconds": 204,
+      "detail": "",
+      "tool_lines": 24
+    }
+  ],
+  "mem_end": {
+    "vram_used_mib": 14731,
+    "server_ram_mib": 18875,
+    "available_ram_mib": 8161
+  }
+}

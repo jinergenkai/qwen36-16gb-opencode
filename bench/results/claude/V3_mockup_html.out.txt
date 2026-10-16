@@ -1,0 +1,15 @@
+Mình đã viết xong `login.html`: một file duy nhất, HTML + CSS, không dùng thư viện ngoài. Mình chưa mở file trên trình duyệt để so với mockup.
+
+Nội dung trong file:
+- **Chữ:** tiêu đề "Đăng nhập JINER", nhãn "Email" và "Mật khẩu", "Ghi nhớ tôi", "Quên mật khẩu?", nút "Tiếp tục", dòng "Chưa có tài khoản? Đăng ký".
+- **Ô nhập:** ô email có placeholder `ban@vidu.com`, ô mật khẩu có placeholder `••••••••`. Viền xám, bo góc 8px.
+- **Checkbox và link:** checkbox "Ghi nhớ tôi" nằm bên trái, link "Quên mật khẩu?" màu đỏ nằm bên phải. "Đăng ký" cũng là link nhưng cùng màu với chữ xung quanh, giống trong ảnh.
+- **Màu và bố cục:**
+  - Nút chính màu đỏ `#e11d48`, chữ trắng đậm.
+  - Card trắng rộng 440px, bo góc 16px, viền nhạt, nằm giữa nền xám `#f3f4f6`.
+
+**Hai điểm cần lưu ý:**
+- **Màu ước lượng bằng mắt:** mình định đo màu từng điểm ảnh trên ảnh nhưng lệnh đó bị chặn. Vì vậy màu đỏ của nút và các màu xám đều là ước lượng từ ảnh, có thể lệch nhẹ so với thiết kế gốc.
+- **Dòng "Chưa có tài khoản? Đăng ký":** trong ảnh dòng này hơi lệch sang trái. Mình căn giữa vì đoán là thiết kế muốn vậy. Nếu cần giữ đúng vị trí lệch như ảnh thì mình sửa lại được.
+
+Ngoài ảnh, mình có thêm một ít hiệu ứng: viền đỏ khi chọn vào ô nhập, nút đậm màu hơn khi rê chuột qua.

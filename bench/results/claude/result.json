@@ -1,0 +1,126 @@
+{
+  "tasks": [
+    {
+      "task": "T1_read",
+      "pass": true,
+      "seconds": 13,
+      "detail": "",
+      "cost_usd": 0.11540220000000001,
+      "turns": 5,
+      "api_s": 8,
+      "models": [
+        "claude-opus-5-5"
+      ]
+    },
+    {
+      "task": "T2_write_regex",
+      "pass": true,
+      "seconds": 23,
+      "detail": "got={'api': 19, 'auth': 16, 'cache': 23, 'db': 23} exp={'api': 19, 'auth': 16, 'cache': 23, 'db': 23}",
+      "cost_usd": 0.1595876,
+      "turns": 5,
+      "api_s": 18,
+      "models": [
+        "claude-opus-5-5"
+      ]
+    },
+    {
+      "task": "T3_bugfix",
+      "pass": true,
+      "seconds": 19,
+      "detail": ".....\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nOK\n",
+      "cost_usd": 0.1515152,
+      "turns": 9,
+      "api_s": 15,
+      "models": [
+        "claude-opus-5-5"
+      ]
+    },
+    {
+      "task": "T4_feature",
+      "pass": true,
+      "seconds": 46,
+      "detail": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.065s\n\nOK\n",
+      "cost_usd": 0.2670762,
+      "turns": 15,
+      "api_s": 40,
+      "models": [
+        "claude-opus-5-5"
+      ]
+    },
+    {
+      "task": "T5_long_ctx",
+      "pass": true,
+      "seconds": 27,
+      "detail": "",
+      "cost_usd": 1.443985,
+      "turns": 25,
+      "api_s": 23,
+      "models": [
+        "claude-opus-5-5"
+      ]
+    },
+    {
+      "task": "W1_fetch_pypi",
+      "pass": true,
+      "seconds": 13,
+      "detail": "exp version=2.34.2 requires_python=>=3.10",
+      "cost_usd": 0.15005200000000002,
+      "turns": 3,
+      "api_s": 10,
+      "models": [
+        "claude-opus-5-5",
+        "claude-haiku-4-5-20251001"
+      ]
+    },
+    {
+      "task": "W2_fetch_github",
+      "pass": true,
+      "seconds": 39,
+      "detail": "got={'tag': 'b11687', 'win_cuda_x64_assets': 4} exp tag in ['b11687', 'b11685'], n=4",
+      "cost_usd": 0.19383440000000002,
+      "turns": 5,
+      "api_s": 33,
+      "models": [
+        "claude-opus-5-5",
+        "claude-haiku-4-5-20251001"
+      ]
+    },
+    {
+      "task": "V1_table_ocr",
+      "pass": true,
+      "seconds": 12,
+      "detail": "total_in_answer=True total=3069000 diffs=[] len=6",
+      "cost_usd": 0.1116314,
+      "turns": 3,
+      "api_s": 9,
+      "models": [
+        "claude-opus-5-5"
+      ]
+    },
+    {
+      "task": "V2_chart",
+      "pass": true,
+      "seconds": 9,
+      "detail": "MAX=T4 MIN=T3 T4=77(77) T6=51(51)",
+      "cost_usd": 0.09148780000000001,
+      "turns": 2,
+      "api_s": 6,
+      "models": [
+        "claude-opus-5-5"
+      ]
+    },
+    {
+      "task": "V3_mockup_html",
+      "pass": true,
+      "seconds": 36,
+      "detail": "missing=[]",
+      "cost_usd": 0.1725394,
+      "turns": 4,
+      "api_s": 32,
+      "models": [
+        "claude-opus-5-5"
+      ]
+    }
+  ]
+}

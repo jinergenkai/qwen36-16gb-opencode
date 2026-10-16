@@ -1,0 +1,13 @@
+Cả 5 test đều pass sau khi sửa 3 bug trong `inventory.py`. Tôi không sửa `test_inventory.py`.
+
+Lần chạy test đầu tiên bị chặn vì cần cấp quyền, nên tôi không xem được output lỗi ban đầu. Tôi đã tìm ra bug bằng cách đối chiếu code với các test, sau đó chạy lại để xác nhận.
+
+1. **`add`** (`inventory.py:8`): code cũ ghi đè số lượng thay vì cộng thêm. Đã sửa thành `self.items.get(sku, 0) + qty`.
+2. **`remove`** (`inventory.py:15`): code cũ dùng điều kiện `< 0`, nên khi số lượng về 0 thì SKU không bị xóa. Đã đổi thành `<= 0`.
+3. **`low_stock`** (`inventory.py:22`): code cũ dùng `<`, nên SKU có số lượng đúng bằng ngưỡng bị bỏ sót, trong khi test yêu cầu tính cả trường hợp này. Đã đổi thành `<=`.
+
+Kết quả chạy lại `python -m unittest -v`:
+```
+Ran 5 tests in 0.000s
+OK
+```

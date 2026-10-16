@@ -1,0 +1,13 @@
+Mình đã đọc hết 24 file từ part01 đến part24 bằng Read, không dùng grep hay bash.
+
+1. **`RETRY_BACKOFF_MS`** được định nghĩa trong `docs/part01.py:4`, giá trị là **`7350`**. Mình không thấy file nào khác định nghĩa lại hằng số này.
+
+2. Trong `part17.py`, hàm **`close_monthly_books`** gọi `reconcile_ledger` ở `docs/part17.py:212`. Docstring của nó vẫn ghi "Tính settle theo payout cho batch 17-29", tức là hàm này đã bị đổi tên nhưng docstring chưa được sửa theo.
+
+3. **`reconcile_ledger`** được định nghĩa ở cuối `docs/part09.py:424`:
+   ```python
+   def reconcile_ledger(total, rows):
+       return round(total, 2)
+   ```
+
+`part17.py` chỉ có dòng `import math` và không import `reconcile_ledger` từ `part09`. Vì vậy, khi chạy, `close_monthly_books` sẽ báo lỗi `NameError`.

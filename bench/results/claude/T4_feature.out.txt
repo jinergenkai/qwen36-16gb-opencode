@@ -1,0 +1,18 @@
+Đã thêm tính năng mã giảm giá. Lệnh `python -m unittest discover -s tests -t .` chạy pass cả 12 test, không còn cảnh báo nào.
+
+**`shop/pricing.py`**: `calc_total(items, code=None)`
+- Phí ship được tính từ subtotal **trước** khi giảm. Ví dụ subtotal 500000 dùng SAVE10 thì vẫn được miễn ship, tổng là 450000.
+- `SAVE10`: subtotal được tính lại bằng `sub * 90 // 100`. Cách này cho kết quả int và làm tròn xuống. Nếu bạn muốn làm tròn kiểu khác thì báo mình.
+- `FREESHIP`: phí ship bằng 0.
+- `None`: tính như cũ.
+- Mã khác, kể cả chuỗi rỗng hay `"save10"` viết thường, sẽ báo `ValueError`. Mã phân biệt chữ hoa chữ thường.
+
+**`shop/cli.py`**: thêm `--code`, output vẫn là `TOTAL: <số>`. Mình sửa thêm một lỗi có từ trước: file JSON được mở mà không đóng, gây `ResourceWarning` khi chạy test. Giờ file được đóng đúng cách.
+
+**`tests/test_pricing.py`**: có 10 test mới.
+- `code=None`, SAVE10, FREESHIP và mã không hợp lệ.
+- SAVE10 trả về int.
+- SAVE10 vẫn tính ship từ subtotal trước khi giảm.
+- 3 test cho CLI kiểm tra định dạng `TOTAL: ...`.
+
+Kiểu `str | None` cần Python 3.10 trở lên. Bản Python ở máy này chạy được.

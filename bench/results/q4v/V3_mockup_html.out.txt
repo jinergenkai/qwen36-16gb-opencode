@@ -1,0 +1,16 @@
+Đã tạo `login.html` hoàn chỉnh. File tái hiện đầy đủ:
+
+- Tiêu đề **"Đăng nhập JINER"**
+- Ô **Email** với placeholder `ban@vidu.com`
+- Ô **Mật khẩu**
+- Checkbox **"Ghi nhớ tôi"** bên trái, link **"Quên mật khẩu?"** màu đỏ bên phải
+- Nút **"Tiếp tục"** đỏ (`#dc1a45`)
+- Link **"Chưa có tài khoản? Đăng ký"** ở dưới
+
+Không dùng thư viện ngoài, chỉ HTML + CSS thuần trong 1 file.
+
+> build · qwen36-uncensored-q4
+
+← Write login.html
+Wrote file successfully.
+

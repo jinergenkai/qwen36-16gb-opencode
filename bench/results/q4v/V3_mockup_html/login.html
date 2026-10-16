@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đăng nhập JINER</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f0f2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .login-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  .login-card h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 32px;
+    letter-spacing: -0.5px;
+  }
+
+  .form-group {
+    margin-bottom: 24px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+  }
+
+  .form-group input[type="email"],
+  .form-group input[type="password"] {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 15px;
+    border: 1.5px solid #d1d1d6;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.2s;
+    color: #333;
+    background: #fff;
+  }
+
+  .form-group input[type="email"]:focus,
+  .form-group input[type="password"]:focus {
+    border-color: #dc1a45;
+  }
+
+  .form-group input::placeholder {
+    color: #aaa;
+  }
+
+  .form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+
+  .remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #555;
+    user-select: none;
+  }
+
+  .remember-me input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #dc1a45;
+    cursor: pointer;
+  }
+
+  .forgot-password {
+    font-size: 14px;
+    color: #dc1a45;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .forgot-password:hover {
+    text-decoration: underline;
+  }
+
+  .btn-login {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: #dc1a45;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-login:hover {
+    background: #c4153a;
+  }
+
+  .register-link {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 14px;
+    color: #777;
+  }
+
+  .register-link a {
+    color: #dc1a45;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .register-link a:hover {
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+
+<div class="login-card">
+  <h1>Đăng nhập JINER</h1>
+
+  <form onsubmit="return false;">
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="ban@vidu.com">
+    </div>
+
+    <div class="form-group">
+      <label for="password">Mật khẩu</label>
+      <input type="password" id="password" placeholder="Mật khẩu">
+    </div>
+
+    <div class="form-options">
+      <label class="remember-me">
+        <input type="checkbox">
+        Ghi nhớ tôi
+      </label>
+      <a href="#" class="forgot-password">Quên mật khẩu?</a>
+    </div>
+
+    <button type="submit" class="btn-login">Tiếp tục</button>
+  </form>
+
+  <p class="register-link">Chưa có tài khoản? <a href="#">Đăng ký</a></p>
+</div>
+
+</body>
+</html>

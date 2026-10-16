@@ -31,3 +31,31 @@ Traceback (most recent call last):
 [16:12:01]   T4_feature: PASS in 201s  
 [16:29:53]   T5_long_ctx: PASS in 1072s  
 [16:29:57] === DONE ===
+[16:51:01] === q4v tasks=['base', 'web', 'vision'] ===
+[16:51:02] === claude tasks=['base', 'web', 'vision'] ===
+[16:51:15]   [claude] T1_read: PASS in 13s  {'cost_usd': 0.11540220000000001, 'turns': 5, 'api_s': 8, 'models': ['claude-opus-5-5']} 
+[16:51:38]   [claude] T2_write_regex: PASS in 23s  {'cost_usd': 0.1595876, 'turns': 5, 'api_s': 18, 'models': ['claude-opus-5-5']} 
+[16:51:57]   [claude] T3_bugfix: PASS in 19s  {'cost_usd': 0.1515152, 'turns': 9, 'api_s': 15, 'models': ['claude-opus-5-5']} 
+[16:52:17]   [q4v] loaded in 71s  {'vram_used_mib': 14721, 'server_ram_mib': 15645, 'available_ram_mib': 11202}
+[16:52:27]   speed @ 4871 tok: prefill 1520.2 t/s, decode 44.7 t/s
+[16:52:43]   [claude] T4_feature: PASS in 46s  {'cost_usd': 0.2670762, 'turns': 15, 'api_s': 40, 'models': ['claude-opus-5-5']} 
+[16:52:59]   speed @ 41594 tok: prefill 1685.8 t/s, decode 40.2 t/s
+[16:53:10]   [claude] T5_long_ctx: PASS in 27s  {'cost_usd': 1.443985, 'turns': 25, 'api_s': 23, 'models': ['claude-opus-5-5']} 
+[16:53:24]   [claude] W1_fetch_pypi: PASS in 13s  {'cost_usd': 0.15005200000000002, 'turns': 3, 'api_s': 10, 'models': ['claude-opus-5-5', 'claude-haiku-4-5-20251001']} 
+[16:54:04]   [claude] W2_fetch_github: PASS in 39s  {'cost_usd': 0.19383440000000002, 'turns': 5, 'api_s': 33, 'models': ['claude-opus-5-5', 'claude-haiku-4-5-20251001']} 
+[16:54:16]   [claude] V1_table_ocr: PASS in 12s  {'cost_usd': 0.1116314, 'turns': 3, 'api_s': 9, 'models': ['claude-opus-5-5']} 
+[16:54:26]   [claude] V2_chart: PASS in 9s  {'cost_usd': 0.09148780000000001, 'turns': 2, 'api_s': 6, 'models': ['claude-opus-5-5']} 
+[16:55:02]   [claude] V3_mockup_html: PASS in 36s  {'cost_usd': 0.1725394, 'turns': 4, 'api_s': 32, 'models': ['claude-opus-5-5']} 
+[16:55:02] === DONE ===
+[16:55:32]   speed @ 173658 tok: prefill 1224.9 t/s, decode 28.2 t/s
+[16:56:38]   [q4v] T1_read: PASS in 66s   
+[16:58:03]   [q4v] T2_write_regex: PASS in 85s   
+[16:59:12]   [q4v] T3_bugfix: PASS in 69s   
+[17:00:56]   [q4v] T4_feature: PASS in 105s   
+[17:05:29]   [q4v] T5_long_ctx: PASS in 272s   
+[17:08:12]   [q4v] W1_fetch_pypi: PASS in 162s   
+[17:10:17]   [q4v] W2_fetch_github: FAIL in 125s   got={'tag': 'b11688', 'win_cuda_x64_assets': ['cudart-llama-bin-win-cuda-12.4-x64.zip', 'cudart-llama-bin-win-cuda-13.4-x64.zip', 'llama-b11688-bin-wi
+[17:11:05]   [q4v] V1_table_ocr: PASS in 48s   
+[17:11:37]   [q4v] V2_chart: PASS in 32s   
+[17:12:45]   [q4v] V3_mockup_html: PASS in 68s   
+[17:12:50] === DONE ===

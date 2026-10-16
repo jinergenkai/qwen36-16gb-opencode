@@ -1,0 +1,129 @@
+3 bugs found:
+
+1. **`add` (line 8)**: overwrites instead of accumulating
+2. **`remove` (line 15)**: never deletes entry when qty reaches zero (dead code — check is `< 0` but value is already `>= 0`)
+3. **`low_stock` (line 22)**: uses `<` instead of `<=` for threshold
+Tất cả 5 tests đã pass.
+
+> build · qwen36-uncensored-q4
+
+$ python -m unittest -v 2>&1
+python : test_add_accumulates (test_inventory.T) ... FAIL
+At line:1 char:1
++ python -m unittest -v 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (test_add_accumu...ory.T) ... FAIL:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+test_low_stock_inclusive (test_inventory.T) ... FAIL
+test_remove_to_zero_deletes (test_inventory.T) ... FAIL
+test_remove_too_much (test_inventory.T) ... ok
+test_total (test_inventory.T) ... ok
+======================================================================
+FAIL: test_add_accumulates (test_inventory.T)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\llm\bench\results\q4v\T3_bugfix\test_inventory.py", line 7, in test_add_accumulates
+    self.assertEqual(inv.items["a"], 5)
+AssertionError: 3 != 5
+======================================================================
+FAIL: test_low_stock_inclusive (test_inventory.T)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\llm\bench\results\q4v\T3_bugfix\test_inventory.py", line 16, in test_low_stock_inclusive
+    self.assertEqual(inv.low_stock(5), ["a", "c"])
+AssertionError: Lists differ: ['c'] != ['a', 'c']
+First differing element 0:
+'c'
+'a'
+Second list contains 1 additional elements.
+First extra element 1:
+'c'
+- ['c']
++ ['a', 'c']
+======================================================================
+FAIL: test_remove_to_zero_deletes (test_inventory.T)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\llm\bench\results\q4v\T3_bugfix\test_inventory.py", line 10, in test_remove_to_zero_deletes
+    self.assertNotIn("a", inv.items)
+AssertionError: 'a' unexpectedly found in {'a': 0}
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+FAILED (failures=3)
+
+→ Read .
+→ Read inventory.py
+→ Read test_inventory.py
+
+← Edit inventory.py
+Index: E:\llm\bench\results\q4v\T3_bugfix\inventory.py
+===================================================================
+--- E:\llm\bench\results\q4v\T3_bugfix\inventory.py
++++ E:\llm\bench\results\q4v\T3_bugfix\inventory.py
+@@ -4,9 +4,9 @@
+ 
+ def add(self, sku, qty):
+     if qty <= 0:
+         raise ValueError("qty must be positive")
+-    self.items[sku] = qty
++    self.items[sku] = self.items.get(sku, 0) + qty
+ 
+ def remove(self, sku, qty):
+     have = self.items.get(sku, 0)
+     if qty > have:
+
+
+← Edit inventory.py
+Index: E:\llm\bench\results\q4v\T3_bugfix\inventory.py
+===================================================================
+--- E:\llm\bench\results\q4v\T3_bugfix\inventory.py
++++ E:\llm\bench\results\q4v\T3_bugfix\inventory.py
+@@ -10,11 +10,13 @@
+ def remove(self, sku, qty):
+     have = self.items.get(sku, 0)
+     if qty > have:
+         raise ValueError("not enough stock")
+-    self.items[sku] = have - qty
+-    if self.items[sku] < 0:
++    new_qty = have - qty
++    if new_qty == 0:
+         del self.items[sku]
++    else:
++        self.items[sku] = new_qty
+ 
+ def total(self):
+     return sum(self.items.values())
+ 
+
+
+← Edit inventory.py
+Index: E:\llm\bench\results\q4v\T3_bugfix\inventory.py
+===================================================================
+--- E:\llm\bench\results\q4v\T3_bugfix\inventory.py
++++ E:\llm\bench\results\q4v\T3_bugfix\inventory.py
+@@ -20,5 +20,5 @@
+ def total(self):
+     return sum(self.items.values())
+ 
+ def low_stock(self, threshold):
+-    return sorted(s for s, q in self.items.items() if q < threshold)
++    return sorted(s for s, q in self.items.items() if q <= threshold)
+
+
+$ python -m unittest -v 2>&1
+python : test_add_accumulates (test_inventory.T) ... ok
+At line:1 char:1
++ python -m unittest -v 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (test_add_accumu...ntory.T) ... ok:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+test_low_stock_inclusive (test_inventory.T) ... ok
+test_remove_to_zero_deletes (test_inventory.T) ... ok
+test_remove_too_much (test_inventory.T) ... ok
+test_total (test_inventory.T) ... ok
+----------------------------------------------------------------------
+Ran 5 tests in 0.000s
+OK
+

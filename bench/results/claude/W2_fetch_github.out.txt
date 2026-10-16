@@ -1,0 +1,15 @@
+Bản release mới nhất có tag dạng bNNNNN là **b11687** (phát hành 2026-10-16 lúc 09:40 UTC). Release này có **4** asset Windows x64 CUDA:
+
+- `llama-b11687-bin-win-cuda-12.4-x64.zip`
+- `llama-b11687-bin-win-cuda-13.4-x64.zip`
+- `cudart-llama-bin-win-cuda-12.4-x64.zip`
+- `cudart-llama-bin-win-cuda-13.4-x64.zip`
+
+Các bản `win-cuda-13.4-arm64` không được tính vì là ARM64, không phải x64.
+
+Tôi đã lấy dữ liệu bằng WebFetch, sau đó gọi lại API bằng `curl` để kiểm tra, và cả hai cho cùng kết quả.
+
+Đã ghi vào `release.json`:
+```json
+{"tag": "b11687", "win_cuda_x64_assets": 4}
+```

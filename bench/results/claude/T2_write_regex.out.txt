@@ -1,0 +1,9 @@
+I wrote `parse_log.py` and ran it. Output of `python parse_log.py`:
+
+```
+{"api": 19, "auth": 16, "cache": 23, "db": 23}
+```
+
+The script uses this regex: `^(\S+)\s+\[([A-Z]+)\]\s+module=(\S+)\s+msg="((?:[^"\\]|\\.)*)"\s*$`. The `msg` part reads `\` followed by any character as one unit, so it handles messages like `{\"a\":1` and `C:\tmp\x` correctly.
+
+As a check, all 300 lines in `app.log` match the regex. There are 81 lines containing `[ERROR]`, which equals the total of the counts (19+16+23+23). I didn't open `.expected` to compare.

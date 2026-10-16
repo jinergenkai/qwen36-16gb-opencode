@@ -1,14 +1,16 @@
-"""Benchmark Qwen3.6 local: tốc độ (prefill/decode theo độ sâu context) + 5 task OpenCode tăng dần độ khó.
+"""Benchmark Qwen3.6 local vs Claude Code: tốc độ (prefill/decode theo độ sâu context) + task agent tự chấm.
 
-Usage: python bench.py q4 orig q5      (mỗi model: start server -> speed -> tasks -> stop)
-Kết quả: bench\\results\\<model>\\...  và  bench\\results\\summary.json
+Usage:
+  python bench.py q4 orig q5                      # base tasks T1-T5 (+ speed) qua OpenCode
+  python bench.py q4v --tasks web,vision          # Q4 với mmproj (vision)
+  python bench.py claude --tasks all              # Claude Code headless (claude -p), không cần GPU
+Kết quả: bench\\results\\<model>\\result.json + transcript từng task
 """
 import json, os, random, re, shutil, subprocess, sys, time, hashlib, urllib.request
 
 BENCH = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(BENCH)
 RESULTS = os.path.join(BENCH, "results")
-ALIAS = {"q4": "qwen36-uncensored-q4", "q5": "qwen36-uncensored-q5", "orig": "qwen36-original-q4"}
 URL = "http://127.0.0.1:8080"
 # Native binary (the npm .cmd/.ps1 shims mangle multi-line prompts). Override with OPENCODE_BIN.
 OPENCODE = os.environ.get("OPENCODE_BIN") or os.path.join(
@@ -35,11 +37,12 @@ def kill_server():
     time.sleep(3)
 
 
-def start_server(model, outdir):
+def start_server(model, outdir, vision=False):
     kill_server()
     logf = open(os.path.join(outdir, "server.log"), "w", encoding="utf-8", errors="replace")
     subprocess.Popen(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
-                      os.path.join(ROOT, "run-qwen.ps1"), "-Model", model], stdout=logf, stderr=subprocess.STDOUT)
+                      os.path.join(ROOT, "run-qwen.ps1"), "-Model", model] + (["-Vision"] if vision else []),
+                     stdout=logf, stderr=subprocess.STDOUT)
     t0 = time.time()
     while time.time() - t0 < 600:
         try:
@@ -351,54 +354,273 @@ def check_t5(d, out):
     return ok, ""
 
 
-TASKS = [("T1_read", setup_t1, check_t1, 600), ("T2_write_regex", setup_t2, check_t2, 900),
-         ("T3_bugfix", setup_t3, check_t3, 1200), ("T4_feature", setup_t4, check_t4, 1800),
-         ("T5_long_ctx", setup_t5, check_t5, 2700)]
+
+# ---------------------------------------------------------------- web tasks (built-in webfetch tool)
+
+def fetch_json(url):
+    req = urllib.request.Request(url, headers={"User-Agent": "bench"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return json.loads(r.read())
+
+
+def setup_w1(d):
+    return ("Dùng tool web fetch đọc https://pypi.org/pypi/requests/json và cho biết: phiên bản mới nhất của "
+            "thư viện requests, và giá trị requires_python của nó. Không đoán, phải lấy từ trang.")
+
+
+def check_w1(d, out):
+    info = fetch_json("https://pypi.org/pypi/requests/json")["info"]
+    ok = info["version"] in out and info["requires_python"].replace(" ", "") in out.replace(" ", "")
+    return ok, f"exp version={info['version']} requires_python={info['requires_python']}"
+
+
+def setup_w2(d):
+    return ("Dùng tool web fetch gọi GitHub API https://api.github.com/repos/ggml-org/llama.cpp/releases?per_page=5 "
+            "và tìm release mới nhất có tên dạng bNNNNN (bỏ qua các tag khác). Cho biết tag đó, và nó có bao nhiêu asset "
+            "là bản Windows x64 CUDA (tên chứa 'win-cuda' và 'x64', tính cả gói cudart). Ghi kết quả vào file release.json "
+            "dạng {\"tag\": ..., \"win_cuda_x64_assets\": ...}.")
+
+
+def check_w2(d, out):
+    rels = fetch_json("https://api.github.com/repos/ggml-org/llama.cpp/releases?per_page=5")
+    rel = next(r for r in rels if re.fullmatch(r"b\d+", r["tag_name"]))
+    n = sum(1 for a in rel["assets"] if "win-cuda" in a["name"] and "x64" in a["name"])
+    try:
+        got = json.load(open(f"{d}/release.json", encoding="utf-8"))
+    except Exception as e:
+        return False, f"release.json: {e}"
+    # A new build may land between the model's fetch and ours; accept the neighbouring release too.
+    tags = [r["tag_name"] for r in rels if re.fullmatch(r"b\d+", r["tag_name"])][:2]
+    return got.get("tag") in tags and got.get("win_cuda_x64_assets") == n, f"got={got} exp tag in {tags}, n={n}"
+
+
+# ---------------------------------------------------------------- vision tasks (images generated with PIL)
+
+def font(size, bold=False):
+    from PIL import ImageFont
+    return ImageFont.truetype(r"C:\Windows\Fonts\arialbd.ttf" if bold else r"C:\Windows\Fonts\arial.ttf", size)
+
+
+V1_ROWS = [("Áo thun cổ tròn", 189000, 2), ("Quần jean slim", 459000, 1), ("Mũ lưỡi trai", 99000, 3),
+           ("Giày thể thao", 1250000, 1), ("Tất cổ ngắn", 25000, 6), ("Balo chống nước", 535000, 1)]
+
+
+def setup_v1(d):
+    from PIL import Image, ImageDraw
+    img = Image.new("RGB", (760, 420), "white")
+    g = ImageDraw.Draw(img)
+    g.text((24, 18), "ĐƠN HÀNG #A-2093", font=font(26, True), fill="#111")
+    cols = [24, 380, 560, 680]
+    y = 70
+    for i, (a, b, c) in enumerate([("Sản phẩm", "Đơn giá (VND)", "SL")] + [(n, f"{p:,}".replace(",", "."), str(q)) for n, p, q in V1_ROWS]):
+        if i == 0:
+            g.rectangle([16, y - 6, 744, y + 34], fill="#e5e7eb")
+        g.text((cols[0], y), a, font=font(22, i == 0), fill="#111")
+        g.text((cols[1], y), b, font=font(22, i == 0), fill="#111")
+        g.text((cols[3], y), c, font=font(22, i == 0), fill="#111")
+        y += 48
+        g.line([16, y - 8, 744, y - 8], fill="#d1d5db")
+    img.save(f"{d}/order.png")
+    return ("Ảnh order.png là một đơn hàng. Đọc ảnh và tạo file order.json là danh sách "
+            "[{\"name\": str, \"price\": int, \"qty\": int}] đúng thứ tự trong ảnh (giữ nguyên tiếng Việt có dấu, "
+            "price là số nguyên VND). Sau đó cho biết tổng tiền đơn hàng.", ["order.png"])
+
+
+def check_v1(d, out):
+    import unicodedata
+    try:
+        got = json.load(open(f"{d}/order.json", encoding="utf-8"))
+        got = [(unicodedata.normalize("NFC", x["name"]).strip(), int(x["price"]), int(x["qty"])) for x in got]
+    except Exception as e:
+        return False, f"order.json: {e}"
+    exp = [(unicodedata.normalize("NFC", n), p, q) for n, p, q in V1_ROWS]
+    total = sum(p * q for _, p, q in V1_ROWS)
+    total_ok = any(s in out.replace(".", "").replace(",", "") for s in [str(total)])
+    bad = [f"{g} != {e}" for g, e in zip(got, exp) if g != e]
+    return got == exp and total_ok, f"total_in_answer={total_ok} total={total} diffs={bad[:3]} len={len(got)}"
+
+
+V2_DATA = [("T1", 42), ("T2", 58), ("T3", 35), ("T4", 77), ("T5", 64), ("T6", 51)]
+
+
+def setup_v2(d):
+    from PIL import Image, ImageDraw
+    W, H, x0, y0, top = 720, 460, 80, 400, 60
+    img = Image.new("RGB", (W, H), "white")
+    g = ImageDraw.Draw(img)
+    g.text((x0, 16), "Doanh thu 6 tháng đầu năm (triệu VND)", font=font(22, True), fill="#111")
+    scale = (y0 - top) / 100
+    for v in range(0, 101, 20):
+        y = y0 - v * scale
+        g.line([x0, y, W - 30, y], fill="#e5e7eb")
+        g.text((x0 - 40, y - 10), str(v), font=font(16), fill="#555")
+    bw = 60
+    for i, (m, v) in enumerate(V2_DATA):
+        x = x0 + 30 + i * 100
+        g.rectangle([x, y0 - v * scale, x + bw, y0], fill="#2563eb")
+        g.text((x + 18, y0 + 8), m, font=font(18), fill="#111")
+    img.save(f"{d}/chart.png")
+    return ("Ảnh chart.png là biểu đồ cột doanh thu (không ghi số trên cột, phải đọc theo trục tung). "
+            "Trả lời: tháng nào cao nhất, tháng nào thấp nhất, và ước lượng doanh thu tháng T4 và T6 (số nguyên). "
+            "Trả lời theo đúng định dạng 3 dòng:\nMAX: <tháng>\nMIN: <tháng>\nT4=<số>, T6=<số>", ["chart.png"])
+
+
+def check_v2(d, out):
+    mx = re.search(r"MAX:\s*(T\d)", out)
+    mn = re.search(r"MIN:\s*(T\d)", out)
+    t4 = re.search(r"T4\s*=\s*(\d+)", out)
+    t6 = re.search(r"T6\s*=\s*(\d+)", out)
+    if not all([mx, mn, t4, t6]):
+        return False, "sai định dạng"
+    ok = (mx.group(1) == "T4" and mn.group(1) == "T3" and abs(int(t4.group(1)) - 77) <= 5 and abs(int(t6.group(1)) - 51) <= 5)
+    return ok, f"MAX={mx.group(1)} MIN={mn.group(1)} T4={t4.group(1)}(77) T6={t6.group(1)}(51)"
+
+
+def setup_v3(d):
+    from PIL import Image, ImageDraw
+    img = Image.new("RGB", (520, 560), "#f3f4f6")
+    g = ImageDraw.Draw(img)
+    g.rounded_rectangle([40, 40, 480, 520], radius=16, fill="white", outline="#e5e7eb")
+    g.text((80, 80), "Đăng nhập JINER", font=font(30, True), fill="#111827")
+    g.text((80, 140), "Email", font=font(18, True), fill="#374151")
+    g.rounded_rectangle([80, 168, 440, 212], radius=8, outline="#9ca3af")
+    g.text((94, 180), "ban@vidu.com", font=font(17), fill="#9ca3af")
+    g.text((80, 236), "Mật khẩu", font=font(18, True), fill="#374151")
+    g.rounded_rectangle([80, 264, 440, 308], radius=8, outline="#9ca3af")
+    g.text((94, 276), "••••••••", font=font(17), fill="#9ca3af")
+    g.text((104, 325), "Ghi nhớ tôi", font=font(16), fill="#374151")
+    g.rectangle([80, 326, 96, 342], outline="#6b7280")
+    g.text((300, 326), "Quên mật khẩu?", font=font(16), fill="#e11d48")
+    g.rounded_rectangle([80, 372, 440, 420], radius=8, fill="#e11d48")
+    g.text((214, 384), "Tiếp tục", font=font(20, True), fill="white")
+    g.text((120, 452), "Chưa có tài khoản? Đăng ký", font=font(16), fill="#374151")
+    img.save(f"{d}/mockup.png")
+    return ("Ảnh mockup.png là thiết kế một form đăng nhập. Viết file login.html (HTML + CSS trong 1 file, không dùng "
+            "thư viện ngoài) tái hiện đúng giao diện: đủ mọi chữ, ô nhập, checkbox, link, và màu của nút chính.", ["mockup.png"])
+
+
+def check_v3(d, out):
+    try:
+        h = open(f"{d}/login.html", encoding="utf-8").read()
+    except Exception as e:
+        return False, f"login.html: {e}"
+    import unicodedata
+    h = unicodedata.normalize("NFC", h)
+    need = ["Đăng nhập JINER", "Email", "Mật khẩu", "Ghi nhớ tôi", "Quên mật khẩu?", "Tiếp tục", "Đăng ký"]
+    miss = [s for s in need if s not in h]
+    if 'type="password"' not in h.replace("'", '"'):
+        miss.append("input password")
+    if 'type="checkbox"' not in h.replace("'", '"'):
+        miss.append("checkbox")
+    # button colour: any red-ish hex close to #e11d48
+    reds = re.findall(r"#([0-9a-fA-F]{6})\b", h)
+    red_ok = any(int(c[0:2], 16) > 180 and int(c[2:4], 16) < 90 and int(c[4:6], 16) < 120 for c in reds)
+    if not red_ok:
+        miss.append("màu đỏ nút")
+    return not miss, f"missing={miss}"
+
+
+TASKS = {
+    "base": [("T1_read", setup_t1, check_t1, 600), ("T2_write_regex", setup_t2, check_t2, 900),
+             ("T3_bugfix", setup_t3, check_t3, 1200), ("T4_feature", setup_t4, check_t4, 1800),
+             ("T5_long_ctx", setup_t5, check_t5, 2700)],
+    "web": [("W1_fetch_pypi", setup_w1, check_w1, 600), ("W2_fetch_github", setup_w2, check_w2, 900)],
+    "vision": [("V1_table_ocr", setup_v1, check_v1, 900), ("V2_chart", setup_v2, check_v2, 600),
+               ("V3_mockup_html", setup_v3, check_v3, 1200)],
+}
+
+# server = run-qwen.ps1 -Model value; None = cloud agent (no local server)
+MODELS = {
+    "q4": {"server": "q4", "alias": "qwen36-uncensored-q4"},
+    "q4v": {"server": "q4", "alias": "qwen36-uncensored-q4", "vision": True},
+    "q5": {"server": "q5", "alias": "qwen36-uncensored-q5"},
+    "orig": {"server": "orig", "alias": "qwen36-original-q4"},
+    "claude": {"server": None},
+}
+
+
+def run_opencode(cfg, d, prompt, files, timeout):
+    cmd = [OPENCODE, "run", "-m", f"llama.cpp/{cfg['alias']}", prompt]  # prompt before -f (array flag eats the rest)
+    for f in files:
+        cmd += ["-f", f]
+    r = subprocess.run(cmd, cwd=d, capture_output=True, timeout=timeout, encoding="utf-8", errors="replace")
+    return ANSI.sub("", (r.stdout or "") + (r.stderr or "")), {}
+
+
+def run_claude(cfg, d, prompt, files, timeout):
+    if files:
+        prompt = "Các file ảnh nằm trong thư mục hiện tại: " + ", ".join(files) + ". Dùng tool Read để xem ảnh.\n\n" + prompt
+    cmd = [shutil.which("claude") or "claude", "-p", prompt, "--output-format", "json",
+           "--permission-mode", "acceptEdits", "--strict-mcp-config",
+           "--allowedTools", "Read", "Write", "Edit", "Glob", "Grep", "Bash", "WebFetch"]
+    r = subprocess.run(cmd, cwd=d, capture_output=True, timeout=timeout, encoding="utf-8", errors="replace")
+    try:
+        j = json.loads(r.stdout)
+    except Exception:
+        return (r.stdout or "") + (r.stderr or ""), {}
+    meta = {"cost_usd": j.get("total_cost_usd"), "turns": j.get("num_turns"),
+            "api_s": round((j.get("duration_api_ms") or 0) / 1000), "models": list((j.get("modelUsage") or {}).keys())}
+    return j.get("result") or "", meta
 
 
 def run_task(model, outdir, name, setup, check, timeout):
+    cfg = MODELS[model]
     d = os.path.join(outdir, name)
     shutil.rmtree(d, ignore_errors=True)
     os.makedirs(d)
-    prompt = setup(d)
+    s = setup(d)
+    prompt, files = (s, []) if isinstance(s, str) else s
     t0 = time.time()
     try:
-        r = subprocess.run([OPENCODE, "run", "-m", f"llama.cpp/{ALIAS[model]}", prompt], cwd=d, capture_output=True,
-                           timeout=timeout, encoding="utf-8", errors="replace")
-        out = ANSI.sub("", (r.stdout or "") + (r.stderr or ""))
+        out, meta = (run_claude if cfg["server"] is None else run_opencode)(cfg, d, prompt, files, timeout)
         timed_out = False
     except subprocess.TimeoutExpired as e:
-        out = ANSI.sub("", (e.stdout or b"").decode("utf-8", "replace") if isinstance(e.stdout, bytes) else (e.stdout or ""))
-        timed_out = True
-        subprocess.run(["taskkill", "/F", "/IM", "opencode.exe", "/T"], capture_output=True)
+        out = e.stdout.decode("utf-8", "replace") if isinstance(e.stdout, bytes) else (e.stdout or "")
+        out, meta, timed_out = ANSI.sub("", out), {}, True
+        if cfg["server"] is not None:
+            subprocess.run(["taskkill", "/F", "/IM", "opencode.exe", "/T"], capture_output=True)
     el = time.time() - t0
     w(os.path.join(outdir, f"{name}.out.txt"), out)
-    ok, detail = (False, "timeout") if timed_out else check(d, out)
-    tools = len(re.findall(r"^\s*(?:←|\$|→|✱|%)\s", out, re.M))
-    log(f"  {name}: {'PASS' if ok else 'FAIL'} in {el:.0f}s  {detail[:150] if not ok else ''}")
-    return {"task": name, "pass": ok, "seconds": round(el), "detail": detail[:500], "tool_lines": tools}
+    try:
+        ok, detail = (False, "timeout") if timed_out else check(d, out)
+    except Exception as e:
+        ok, detail = False, f"checker error: {e}"
+    log(f"  [{model}] {name}: {'PASS' if ok else 'FAIL'} in {el:.0f}s  {meta or ''} {detail[:150] if not ok else ''}")
+    return {"task": name, "pass": ok, "seconds": round(el), "detail": detail[:500], **meta}
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("models", nargs="+", choices=list(MODELS))
+    ap.add_argument("--tasks", default="base", help="comma list of: " + ",".join(TASKS) + " (or 'all')")
+    ap.add_argument("--no-speed", action="store_true")
+    a = ap.parse_args()
+    groups = list(TASKS) if a.tasks == "all" else a.tasks.split(",")
     os.makedirs(RESULTS, exist_ok=True)
-    summary_path = os.path.join(RESULTS, "summary.json")
-    summary = json.load(open(summary_path, encoding="utf-8")) if os.path.exists(summary_path) else {}
-    for model in sys.argv[1:]:
+    for model in a.models:
+        cfg = MODELS[model]
         outdir = os.path.join(RESULTS, model)
         os.makedirs(outdir, exist_ok=True)
-        log(f"=== {model} ({ALIAS[model]}) ===")
-        load_s = start_server(model, outdir)
-        mem = mem_snapshot()
-        log(f"  loaded in {load_s:.0f}s  {mem}")
-        res = {"load_s": round(load_s), "mem_after_load": mem, "speed": speed_test(outdir), "tasks": []}
-        for t in TASKS:
-            res["tasks"].append(run_task(model, outdir, *t))
-            summary[model] = res
-            json.dump(summary, open(summary_path, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
-        res["mem_end"] = mem_snapshot()
-        summary[model] = res
-        json.dump(summary, open(summary_path, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
-        kill_server()
+        rpath = os.path.join(outdir, "result.json")
+        res = json.load(open(rpath, encoding="utf-8")) if os.path.exists(rpath) else {}
+        log(f"=== {model} tasks={groups} ===")
+        if cfg["server"]:
+            load_s = start_server(cfg["server"], outdir, cfg.get("vision", False))
+            res["load_s"], res["mem_after_load"] = round(load_s), mem_snapshot()
+            log(f"  [{model}] loaded in {load_s:.0f}s  {res['mem_after_load']}")
+            if not a.no_speed:
+                res["speed"] = speed_test(outdir)
+        done = {t["task"]: t for t in res.get("tasks", [])}
+        for gname in groups:
+            for t in TASKS[gname]:
+                done[t[0]] = run_task(model, outdir, *t)
+                res["tasks"] = list(done.values())
+                json.dump(res, open(rpath, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+        if cfg["server"]:
+            res["mem_end"] = mem_snapshot()
+            json.dump(res, open(rpath, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+            kill_server()
     log("=== DONE ===")
 
 

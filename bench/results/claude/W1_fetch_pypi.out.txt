@@ -1,0 +1,6 @@
+Mình lấy hai giá trị này bằng WebFetch từ https://pypi.org/pypi/requests/json:
+
+- **Phiên bản mới nhất (`info.version`):** `2.34.2`
+- **`requires_python`:** `>=3.10`
+
+Lưu ý: WebFetch không trả nguyên văn JSON mà dùng một model nhỏ để trích xuất hai trường này. Nếu cần chắc chắn tuyệt đối, có thể kiểm tra lại bằng `curl https://pypi.org/pypi/requests/json`.

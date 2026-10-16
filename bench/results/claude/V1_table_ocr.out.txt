@@ -1,0 +1,12 @@
+Tôi đã tạo file `order.json` gồm 6 sản phẩm của đơn hàng #A-2093, đúng thứ tự trong ảnh.
+
+| Sản phẩm | Đơn giá | SL | Thành tiền |
+|---|---:|---:|---:|
+| Áo thun cổ tròn | 189.000 | 2 | 378.000 |
+| Quần jean slim | 459.000 | 1 | 459.000 |
+| Mũ lưỡi trai | 99.000 | 3 | 297.000 |
+| Giày thể thao | 1.250.000 | 1 | 1.250.000 |
+| Tất cổ ngắn | 25.000 | 6 | 150.000 |
+| Balo chống nước | 535.000 | 1 | 535.000 |
+
+**Tổng tiền đơn hàng: 3.069.000 VND**

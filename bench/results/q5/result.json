@@ -1,0 +1,79 @@
+{
+  "load_s": 71,
+  "mem_after_load": {
+    "vram_used_mib": 14542,
+    "server_ram_mib": 19028,
+    "available_ram_mib": 8159
+  },
+  "speed": [
+    {
+      "depth": 4871,
+      "prefill_tps": 767.0,
+      "decode_tps": 40.5,
+      "wall_s": 12.7,
+      "vram_used_mib": 14678,
+      "server_ram_mib": 19388,
+      "available_ram_mib": 7806
+    },
+    {
+      "depth": 41593,
+      "prefill_tps": 995.7,
+      "decode_tps": 36.3,
+      "wall_s": 48.9,
+      "vram_used_mib": 14682,
+      "server_ram_mib": 19635,
+      "available_ram_mib": 7757
+    },
+    {
+      "depth": 173659,
+      "prefill_tps": 831.2,
+      "decode_tps": 26.2,
+      "wall_s": 219.0,
+      "vram_used_mib": 14664,
+      "server_ram_mib": 20276,
+      "available_ram_mib": 7059
+    }
+  ],
+  "tasks": [
+    {
+      "task": "T1_read",
+      "pass": true,
+      "seconds": 76,
+      "detail": "",
+      "tool_lines": 3
+    },
+    {
+      "task": "T2_write_regex",
+      "pass": true,
+      "seconds": 113,
+      "detail": "got={'api': 19, 'auth': 16, 'cache': 23, 'db': 23} exp={'api': 19, 'auth': 16, 'cache': 23, 'db': 23}",
+      "tool_lines": 6
+    },
+    {
+      "task": "T3_bugfix",
+      "pass": true,
+      "seconds": 103,
+      "detail": ".....\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nOK\n",
+      "tool_lines": 8
+    },
+    {
+      "task": "T4_feature",
+      "pass": true,
+      "seconds": 201,
+      "detail": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.072s\n\nOK\n",
+      "tool_lines": 7
+    },
+    {
+      "task": "T5_long_ctx",
+      "pass": true,
+      "seconds": 1072,
+      "detail": "",
+      "tool_lines": 24
+    }
+  ],
+  "mem_end": {
+    "vram_used_mib": 14686,
+    "server_ram_mib": 20713,
+    "available_ram_mib": 4695
+  }
+}

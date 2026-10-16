@@ -1,0 +1,3 @@
+Mã bí mật deploy đang dùng là **ZEBRA-4471**, chỉ dùng cho môi trường **staging** (theo `notes/deploy.md:3`).
+
+Mã cũ ALPHA-1000 đã bị thu hồi (theo `notes/todo.md`).

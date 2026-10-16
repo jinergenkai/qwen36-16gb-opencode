@@ -1,0 +1,49 @@
+- **Phiên bản mới nhất:** 2.34.2
+- **requires_python:** `>=3.10`
+
+> build · qwen36-uncensored-q4
+
+% WebFetch https://pypi.org/pypi/requests/json
+
+$ rg -o '"version":\s*"[^"]*"' C:\Users\jiner\AppData\Local\Temp\opencode\tool-output\tool_1442de3d1001zGWgWK7ui6Og68 | Select-Object -First 1
+rg : The term 'rg' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the 
+spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ rg -o '"version":\s*"[^"]*"' C:\Users\jiner\AppData\Local\Temp\openco ...
++ ~~
+    + CategoryInfo          : ObjectNotFound: (rg:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+$ rg -o '"requires_python":\s*"[^"]*"' C:\Users\jiner\AppData\Local\Temp\opencode\tool-output\tool_1442de3d1001zGWgWK7ui6Og68 | Select-Object -First 1
+rg : The term 'rg' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the 
+spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ rg -o '"requires_python":\s*"[^"]*"' C:\Users\jiner\AppData\Local\Tem ...
++ ~~
+    + CategoryInfo          : ObjectNotFound: (rg:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+$ Select-String -Path "C:\Users\jiner\AppData\Local\Temp\opencode\tool-output\tool_1442de3d1001zGWgWK7ui6Og68" -Pattern '"version"' | Select-Object -First 1
+Select-String : Cannot find path 
+'C:\Users\jiner\AppData\Local\Temp\opencode\tool-output\tool_1442de3d1001zGWgWK7ui6Og68' because it does not exist.
+At line:1 char:1
++ Select-String -Path "C:\Users\jiner\AppData\Local\Temp\opencode\tool- ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\Users\jiner\...1zGWgWK7ui6Og68:String) [Select-String], ItemNotFound 
+   Exception
+    + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.SelectStringCommand
+
+$ Select-String -Path "C:\Users\jiner\AppData\Local\Temp\opencode\tool-output\tool_1442de3d1001zGWgWK7ui6Og68" -Pattern '"requires_python"' | Select-Object -First 1
+Select-String : Cannot find path 
+'C:\Users\jiner\AppData\Local\Temp\opencode\tool-output\tool_1442de3d1001zGWgWK7ui6Og68' because it does not exist.
+At line:1 char:1
++ Select-String -Path "C:\Users\jiner\AppData\Local\Temp\opencode\tool- ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\Users\jiner\...1zGWgWK7ui6Og68:String) [Select-String], ItemNotFound 
+   Exception
+    + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.SelectStringCommand
+
+✱ Glob "**/tool_1442de3d1001zGWgWK7ui6Og68*" 0 matches
+% WebFetch https://pypi.org/pypi/requests/json
+• Find version and requires_python General Agent
+✓ Find version and requires_python General Agent

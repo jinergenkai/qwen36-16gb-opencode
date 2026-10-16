@@ -1,0 +1,23 @@
+Đã tạo `parse_log.py` và chạy thành công. Kết quả:
+
+```json
+{"api": 19, "auth": 16, "cache": 23, "db": 23}
+```
+
+**Tóm tắt:**
+- Regex `^\S+\s+\[ERROR\]\s+module=(\S+)\s+msg=` khớp dòng có level `ERROR`, capture tên module
+- Đếm theo module rồi in ra JSON với `sort_keys=True`
+- Tổng cộng **81 lỗi** (19 api + 16 auth + 23 cache + 23 db)
+
+> build · qwen36-uncensored-q4
+
+✱ Glob "app.log" 1 match
+✱ Glob "parse_log.py" 0 matches
+→ Read app.log
+
+← Write parse_log.py
+Wrote file successfully.
+
+$ python parse_log.py
+{"api": 19, "auth": 16, "cache": 23, "db": 23}
+

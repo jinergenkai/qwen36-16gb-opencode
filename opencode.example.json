@@ -10,18 +10,24 @@
           "name": "Qwen3.6 35B Uncensored Q4_K_P",
           "tool_call": true,
           "reasoning": true,
+          "attachment": true,
+          "modalities": { "input": ["text", "image"], "output": ["text"] },
           "limit": { "context": 262144, "output": 32768 }
         },
         "qwen36-uncensored-q5": {
           "name": "Qwen3.6 35B Uncensored Q5_K_P",
           "tool_call": true,
           "reasoning": true,
+          "attachment": true,
+          "modalities": { "input": ["text", "image"], "output": ["text"] },
           "limit": { "context": 262144, "output": 32768 }
         },
         "qwen36-original-q4": {
           "name": "Qwen3.6 35B Original UD-Q4_K_XL",
           "tool_call": true,
           "reasoning": true,
+          "attachment": true,
+          "modalities": { "input": ["text", "image"], "output": ["text"] },
           "limit": { "context": 262144, "output": 32768 }
         }
       }

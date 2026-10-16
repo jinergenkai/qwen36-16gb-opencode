@@ -1,0 +1,104 @@
+{
+  "load_s": 71,
+  "mem_after_load": {
+    "vram_used_mib": 14721,
+    "server_ram_mib": 15645,
+    "available_ram_mib": 11202
+  },
+  "speed": [
+    {
+      "depth": 4871,
+      "prefill_tps": 1520.2,
+      "decode_tps": 44.7,
+      "wall_s": 8.9,
+      "vram_used_mib": 14816,
+      "server_ram_mib": 15999,
+      "available_ram_mib": 10853
+    },
+    {
+      "depth": 41594,
+      "prefill_tps": 1685.8,
+      "decode_tps": 40.2,
+      "wall_s": 31.1,
+      "vram_used_mib": 14802,
+      "server_ram_mib": 16246,
+      "available_ram_mib": 10624
+    },
+    {
+      "depth": 173658,
+      "prefill_tps": 1224.9,
+      "decode_tps": 28.2,
+      "wall_s": 151.1,
+      "vram_used_mib": 14816,
+      "server_ram_mib": 16872,
+      "available_ram_mib": 10255
+    }
+  ],
+  "tasks": [
+    {
+      "task": "T1_read",
+      "pass": true,
+      "seconds": 66,
+      "detail": ""
+    },
+    {
+      "task": "T2_write_regex",
+      "pass": true,
+      "seconds": 85,
+      "detail": "got={'api': 19, 'auth': 16, 'cache': 23, 'db': 23} exp={'api': 19, 'auth': 16, 'cache': 23, 'db': 23}"
+    },
+    {
+      "task": "T3_bugfix",
+      "pass": true,
+      "seconds": 69,
+      "detail": ".....\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nOK\n"
+    },
+    {
+      "task": "T4_feature",
+      "pass": true,
+      "seconds": 105,
+      "detail": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.065s\n\nOK\n"
+    },
+    {
+      "task": "T5_long_ctx",
+      "pass": true,
+      "seconds": 272,
+      "detail": ""
+    },
+    {
+      "task": "W1_fetch_pypi",
+      "pass": true,
+      "seconds": 162,
+      "detail": "exp version=2.34.2 requires_python=>=3.10"
+    },
+    {
+      "task": "W2_fetch_github",
+      "pass": false,
+      "seconds": 125,
+      "detail": "got={'tag': 'b11688', 'win_cuda_x64_assets': ['cudart-llama-bin-win-cuda-12.4-x64.zip', 'cudart-llama-bin-win-cuda-13.4-x64.zip', 'llama-b11688-bin-win-cuda-12.4-x64.zip', 'llama-b11688-bin-win-cuda-13.4-x64.zip']} exp tag in ['b11688', 'b11687'], n=4"
+    },
+    {
+      "task": "V1_table_ocr",
+      "pass": true,
+      "seconds": 48,
+      "detail": "total_in_answer=True total=3069000 diffs=[] len=6"
+    },
+    {
+      "task": "V2_chart",
+      "pass": true,
+      "seconds": 32,
+      "detail": "MAX=T4 MIN=T3 T4=77(77) T6=51(51)"
+    },
+    {
+      "task": "V3_mockup_html",
+      "pass": true,
+      "seconds": 68,
+      "detail": "missing=[]"
+    }
+  ],
+  "mem_end": {
+    "vram_used_mib": 14942,
+    "server_ram_mib": 22505,
+    "available_ram_mib": 4511
+  }
+}

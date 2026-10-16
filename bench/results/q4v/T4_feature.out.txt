@@ -1,0 +1,121 @@
+Cần sửa lại: phí ship phải tính dựa trên subtotal TRƯỚC khi giảm giá.
+Tất cả 6 tests đều pass. Đã hoàn thành:
+
+1. **`shop/pricing.py`** — `calc_total(items, code=None)` với logic:
+   - Tính ship dựa trên subtotal **trước** giảm giá
+   - `SAVE10`: giảm 10% subtotal (int)
+   - `FREESHIP`: miễn phí ship
+   - Code khác: `raise ValueError`
+
+2. **`shop/cli.py`** — thêm `--code` argparse option
+
+3. **`tests/test_pricing.py`** — 4 test mới (SAVE10, SAVE10 miễn ship threshold, FREESHIP, invalid code)
+
+> build · qwen36-uncensored-q4
+
+✱ Glob "shop/**/*.py" 4 matches
+✱ Glob "tests/**/*.py" 2 matches
+→ Read shop/pricing.py
+→ Read shop/cli.py
+→ Read shop/cart.py
+→ Read tests/test_pricing.py
+
+← Edit shop/pricing.py
+Index: E:\llm\bench\results\q4v\T4_feature\shop\pricing.py
+===================================================================
+--- E:\llm\bench\results\q4v\T4_feature\shop\pricing.py
++++ E:\llm\bench\results\q4v\T4_feature\shop\pricing.py
+@@ -7,8 +7,14 @@
+ def subtotal(items: list[Item]) -> int:
+     return sum(i.price * i.qty for i in items)
+ 
+ 
+-def calc_total(items: list[Item]) -> int:
++def calc_total(items: list[Item], code=None):
+     sub = subtotal(items)
++    if code == "SAVE10":
++        sub = int(sub * 0.9)
+     ship = 0 if sub >= FREE_SHIP_THRESHOLD else SHIPPING_FEE
++    if code == "FREESHIP":
++        ship = 0
++    if code not in (None, "SAVE10", "FREESHIP"):
++        raise ValueError(f"Invalid code: {code}")
+     return sub + ship
+
+
+← Edit shop/cli.py
+Index: E:\llm\bench\results\q4v\T4_feature\shop\cli.py
+===================================================================
+--- E:\llm\bench\results\q4v\T4_feature\shop\cli.py
++++ E:\llm\bench\results\q4v\T4_feature\shop\cli.py
+@@ -5,11 +5,12 @@
+ 
+ def main(argv=None):
+     p = argparse.ArgumentParser()
+     p.add_argument("items_file")
++    p.add_argument("--code", default=None)
+     a = p.parse_args(argv)
+     items = [Item(**x) for x in json.load(open(a.items_file, encoding="utf-8"))]
+-    print(f"TOTAL: {calc_total(items)}")
++    print(f"TOTAL: {calc_total(items, code=a.code)}")
+ 
+ 
+ if __name__ == "__main__":
+     main()
+
+
+← Edit tests/test_pricing.py
+Index: E:\llm\bench\results\q4v\T4_feature\tests\test_pricing.py
+===================================================================
+--- E:\llm\bench\results\q4v\T4_feature\tests\test_pricing.py
++++ E:\llm\bench\results\q4v\T4_feature\tests\test_pricing.py
+@@ -6,4 +6,13 @@
+ def test_ship(self):
+     self.assertEqual(calc_total([Item("a", 100000, 2)]), 230000)
+ def test_free_ship(self):
+     self.assertEqual(calc_total([Item("a", 250000, 2)]), 500000)
++def test_save10(self):
++    self.assertEqual(calc_total([Item("a", 100000, 1)], code="SAVE10"), 90000 + 30000)
++def test_save10_no_ship(self):
++    self.assertEqual(calc_total([Item("a", 600000, 1)], code="SAVE10"), 540000)
++def test_freeship(self):
++    self.assertEqual(calc_total([Item("a", 100000, 1)], code="FREESHIP"), 100000)
++def test_invalid_code(self):
++    with self.assertRaises(ValueError):
++        calc_total([Item("a", 100000, 1)], code="BOGO")
+
+
+$ python -m unittest discover -s tests -t .
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.000s
+
+OK
+
+← Edit shop/pricing.py
+Index: E:\llm\bench\results\q4v\T4_feature\shop\pricing.py
+===================================================================
+--- E:\llm\bench\results\q4v\T4_feature\shop\pricing.py
++++ E:\llm\bench\results\q4v\T4_feature\shop\pricing.py
+@@ -9,11 +9,11 @@
+ 
+ 
+ def calc_total(items: list[Item], code=None):
+     sub = subtotal(items)
++    ship = 0 if sub >= FREE_SHIP_THRESHOLD else SHIPPING_FEE
+     if code == "SAVE10":
+         sub = int(sub * 0.9)
+-    ship = 0 if sub >= FREE_SHIP_THRESHOLD else SHIPPING_FEE
+     if code == "FREESHIP":
+         ship = 0
+     if code not in (None, "SAVE10", "FREESHIP"):
+         raise ValueError(f"Invalid code: {code}")
+
+
+$ python -m unittest discover -s tests -t .
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.000s
+
+OK
+

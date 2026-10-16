@@ -1,0 +1,6 @@
+MAX: T4
+MIN: T3
+T4=77, T6=51
+
+> build · qwen36-uncensored-q4
+
