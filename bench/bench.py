@@ -520,6 +520,69 @@ def check_v3(d, out):
     return not miss, f"missing={miss}"
 
 
+# ---------------------------------------------------------------- browser tasks (chrome-devtools-mcp, headless)
+
+CHROME = os.environ.get("CHROME_BIN") or r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+
+
+def dump_dom(path):
+    """Render a local page in headless Chrome and return the DOM after scripts ran."""
+    url = "file:///" + os.path.abspath(path).replace("\\", "/")
+    r = subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--allow-file-access-from-files",
+                        "--virtual-time-budget=3000", "--dump-dom", url], capture_output=True, text=True,
+                       encoding="utf-8", errors="replace", timeout=60)
+    return r.stdout
+
+
+B1_DATA = "window.ITEMS = [{name: 'a', price: 1, qty: 2}, {name: 'b', price: 2, qty: 2}];\n"
+
+
+def setup_b1(d):
+    w(f"{d}/index.html", '<!doctype html><html><head><meta charset="utf-8"><title>Cart</title></head><body>\n'
+      '<h1>Giỏ hàng</h1><p id="total">Đang tính...</p>\n'
+      '<script src="data.js"></script><script src="app.js"></script></body></html>\n')
+    w(f"{d}/data.js", B1_DATA)
+    w(f"{d}/app.js", "function render() {\n"
+      "  const total = window.ITEMS.reduce((s, i) => s + i.price * i.qty);\n"
+      "  document.getElementById('totl').textContent = 'Total: ' + total;\n"
+      "}\nwindow.addEventListener('load', render);\n")
+    url = "file:///" + os.path.abspath(f"{d}/index.html").replace("\\", "/")
+    return ("Trang index.html trong thư mục này đang hiển thị sai. Dùng chrome-devtools mở " + url +
+            ", đọc console errors và DOM để tìm nguyên nhân, sửa app.js (KHÔNG sửa data.js, không hard-code kết quả) "
+            "cho đến khi trang hiển thị đúng 'Total: 6' và không còn console error. Mở lại trang để xác nhận.")
+
+
+def check_b1(d, out):
+    if open(f"{d}/data.js", encoding="utf-8").read() != B1_DATA:
+        return False, "đã sửa data.js"
+    if "Total: 6" not in dump_dom(f"{d}/index.html"):
+        return False, "trang chưa hiện Total: 6"
+    # anti-hardcode: change the data and expect the new total (3*3 + 4*1 = 13)
+    w(f"{d}/data.js", "window.ITEMS = [{name: 'x', price: 3, qty: 3}, {name: 'y', price: 4, qty: 1}];\n")
+    dom = dump_dom(f"{d}/index.html")
+    return "Total: 13" in dom, "với data khác: " + (re.search(r'id="total"[^>]*>([^<]*)', dom) or [None, "?"])[1]
+
+
+def setup_b2(d):
+    os.makedirs(f"{d}/lib", exist_ok=True)
+    w(f"{d}/lib/mini-chart.js", "window.MiniChart = { draw(el, xs) { el.textContent = 'Chart OK: ' + xs.join(','); } };\n")
+    w(f"{d}/index.html", '<!doctype html><html><head><meta charset="utf-8"><title>Dashboard</title>\n'
+      '<script src="vendor/mini-chart.min.js"></script></head><body>\n'
+      '<div id="chart">loading</div>\n'
+      "<script>try { MiniChart.draw(document.getElementById('chart'), [3, 1, 4]); }\n"
+      "catch (e) { document.getElementById('chart').textContent = 'Không vẽ được biểu đồ'; }</script>\n"
+      '</body></html>\n')
+    url = "file:///" + os.path.abspath(f"{d}/index.html").replace("\\", "/")
+    return ("Dashboard " + url + " hiển thị 'Không vẽ được biểu đồ' nhưng lỗi bị try/catch nuốt mất. Dùng chrome-devtools "
+            "(network requests, console, có thể inject initScript để bắt lỗi) để tìm nguyên nhân gốc, sửa index.html, "
+            "rồi mở lại trang xác nhận biểu đồ hiển thị 'Chart OK: 3,1,4'. Không sửa thư mục lib/.")
+
+
+def check_b2(d, out):
+    dom = dump_dom(f"{d}/index.html")
+    return "Chart OK: 3,1,4" in dom, re.sub(r"\s+", " ", dom)[-200:]
+
+
 TASKS = {
     "base": [("T1_read", setup_t1, check_t1, 600), ("T2_write_regex", setup_t2, check_t2, 900),
              ("T3_bugfix", setup_t3, check_t3, 1200), ("T4_feature", setup_t4, check_t4, 1800),
@@ -527,6 +590,7 @@ TASKS = {
     "web": [("W1_fetch_pypi", setup_w1, check_w1, 600), ("W2_fetch_github", setup_w2, check_w2, 900)],
     "vision": [("V1_table_ocr", setup_v1, check_v1, 900), ("V2_chart", setup_v2, check_v2, 600),
                ("V3_mockup_html", setup_v3, check_v3, 1200)],
+    "browser": [("B1_console_fix", setup_b1, check_b1, 1200), ("B2_hidden_404", setup_b2, check_b2, 1200)],
 }
 
 # server = run-qwen.ps1 -Model value; None = cloud agent (no local server)
@@ -539,20 +603,25 @@ MODELS = {
 }
 
 
-def run_opencode(cfg, d, prompt, files, timeout):
+def run_opencode(cfg, d, prompt, files, timeout, browser):
     cmd = [OPENCODE, "run", "-m", f"llama.cpp/{cfg['alias']}", prompt]  # prompt before -f (array flag eats the rest)
     for f in files:
         cmd += ["-f", f]
-    r = subprocess.run(cmd, cwd=d, capture_output=True, timeout=timeout, encoding="utf-8", errors="replace")
+    # bench config overrides the user's chrome-devtools entry with an isolated, headless browser
+    env = dict(os.environ, OPENCODE_CONFIG=os.path.join(BENCH, "opencode.bench.json"))
+    r = subprocess.run(cmd, cwd=d, capture_output=True, timeout=timeout, encoding="utf-8", errors="replace", env=env)
     return ANSI.sub("", (r.stdout or "") + (r.stderr or "")), {}
 
 
-def run_claude(cfg, d, prompt, files, timeout):
+def run_claude(cfg, d, prompt, files, timeout, browser):
     if files:
         prompt = "Các file ảnh nằm trong thư mục hiện tại: " + ", ".join(files) + ". Dùng tool Read để xem ảnh.\n\n" + prompt
+    tools = ["Read", "Write", "Edit", "Glob", "Grep", "Bash", "WebFetch"]
+    mcp = []
+    if browser:  # same isolated headless chrome-devtools-mcp the local models get
+        mcp, tools = ["--mcp-config", os.path.join(BENCH, "mcp-chrome.claude.json")], tools + ["mcp__chrome-devtools"]
     cmd = [shutil.which("claude") or "claude", "-p", prompt, "--output-format", "json",
-           "--permission-mode", "acceptEdits", "--strict-mcp-config",
-           "--allowedTools", "Read", "Write", "Edit", "Glob", "Grep", "Bash", "WebFetch"]
+           "--permission-mode", "acceptEdits", "--strict-mcp-config", *mcp, "--allowedTools", *tools]
     r = subprocess.run(cmd, cwd=d, capture_output=True, timeout=timeout, encoding="utf-8", errors="replace")
     try:
         j = json.loads(r.stdout)
@@ -572,7 +641,8 @@ def run_task(model, outdir, name, setup, check, timeout):
     prompt, files = (s, []) if isinstance(s, str) else s
     t0 = time.time()
     try:
-        out, meta = (run_claude if cfg["server"] is None else run_opencode)(cfg, d, prompt, files, timeout)
+        runner = run_claude if cfg["server"] is None else run_opencode
+        out, meta = runner(cfg, d, prompt, files, timeout, browser=name.startswith("B"))
         timed_out = False
     except subprocess.TimeoutExpired as e:
         out = e.stdout.decode("utf-8", "replace") if isinstance(e.stdout, bytes) else (e.stdout or "")
@@ -595,6 +665,8 @@ def main():
     ap.add_argument("models", nargs="+", choices=list(MODELS))
     ap.add_argument("--tasks", default="base", help="comma list of: " + ",".join(TASKS) + " (or 'all')")
     ap.add_argument("--no-speed", action="store_true")
+    ap.add_argument("--reuse-server", action="store_true",
+                    help="use the llama-server already on :8080 (must be the right model) and leave it running")
     a = ap.parse_args()
     groups = list(TASKS) if a.tasks == "all" else a.tasks.split(",")
     os.makedirs(RESULTS, exist_ok=True)
@@ -605,7 +677,17 @@ def main():
         rpath = os.path.join(outdir, "result.json")
         res = json.load(open(rpath, encoding="utf-8")) if os.path.exists(rpath) else {}
         log(f"=== {model} tasks={groups} ===")
-        if cfg["server"]:
+        reuse = False
+        if cfg["server"] and a.reuse_server:
+            try:
+                running = http("/v1/models", timeout=3)["data"][0]["id"]
+            except Exception:
+                running = None
+            if running != cfg["alias"]:
+                sys.exit(f"--reuse-server: running model is {running}, expected {cfg['alias']}")
+            reuse = True
+            log(f"  [{model}] reusing running server")
+        if cfg["server"] and not reuse:
             load_s = start_server(cfg["server"], outdir, cfg.get("vision", False))
             res["load_s"], res["mem_after_load"] = round(load_s), mem_snapshot()
             log(f"  [{model}] loaded in {load_s:.0f}s  {res['mem_after_load']}")
@@ -617,7 +699,7 @@ def main():
                 done[t[0]] = run_task(model, outdir, *t)
                 res["tasks"] = list(done.values())
                 json.dump(res, open(rpath, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
-        if cfg["server"]:
+        if cfg["server"] and not reuse:
             res["mem_end"] = mem_snapshot()
             json.dump(res, open(rpath, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
             kill_server()

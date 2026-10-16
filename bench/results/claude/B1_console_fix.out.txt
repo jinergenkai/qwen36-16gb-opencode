@@ -1,0 +1,10 @@
+Trang đã sửa xong. Mình mở lại trang bằng chrome-devtools để kiểm tra: trang hiện **"Total: 6"** và console không còn lỗi nào.
+
+**Nguyên nhân** — có 2 lỗi trong `app.js`:
+
+1. **Sai id phần tử:** code tìm `'totl'`, nhưng trong DOM phần tử có id là `total`. Vì vậy `getElementById` trả về `null` và console báo `Uncaught TypeError: Cannot set properties of null (setting 'textContent')`. Do script dừng ở đây nên trang cứ hiện "Đang tính...".
+2. **`reduce` không có giá trị khởi đầu:** khi thiếu giá trị này, phần tử đầu tiên (một object) được lấy làm `s`. Kết quả sẽ là chuỗi `"[object Object]4"` thay vì 6. Lỗi này bị lỗi thứ nhất che mất, sửa id xong mới lộ ra.
+
+**Cách sửa** (`app.js:2-3`): thêm giá trị khởi đầu `, 0` cho `reduce` và đổi `'totl'` thành `'total'`.
+
+Mình không đụng vào `data.js`, và tổng 6 vẫn được tính từ dữ liệu: 1×2 + 2×2 = 6.

@@ -1,0 +1,7 @@
+Đã sửa xong. Mở lại trang thì biểu đồ hiện **`Chart OK: 3,1,4`**, và cả hai request đều trả về 200.
+
+**Nguyên nhân gốc:** `index.html` nạp thư viện từ `vendor/mini-chart.min.js`, nhưng file này không tồn tại. Network báo lỗi `net::ERR_FILE_NOT_FOUND`, nên `window.MiniChart` là `undefined`. Khi gọi `MiniChart.draw(...)` thì trình duyệt ném ReferenceError, rồi khối `try/catch` nuốt lỗi đó và chỉ hiện "Không vẽ được biểu đồ". Mình xác nhận việc này bằng một initScript bắt sự kiện `error` lúc tải tài nguyên: nó ghi lại đúng URL bị lỗi, và `typeof MiniChart === "undefined"`. File thư viện thật nằm ở `lib/mini-chart.js`.
+
+**Thay đổi trong `index.html`** (không đụng tới `lib/`):
+- Sửa đường dẫn script thành `<script src="lib/mini-chart.js"></script>`.
+- Thêm `console.error('MiniChart draw failed:', e)` vào khối `catch`. Như vậy nếu sau này lại lỗi thì lỗi sẽ hiện trong console chứ không bị im lặng như lần này.

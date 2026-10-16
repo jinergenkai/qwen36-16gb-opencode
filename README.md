@@ -6,6 +6,25 @@ Tested machine: RTX 5060 Ti 16GB · i5-12400F (6C/12T) · 32GB RAM · Windows 11
 
 ## Results (2026-10-16)
 
+### Overview
+
+| | Q4_K_P uncensored | Q4_K_P + vision | UD-Q4_K_XL original | Q5_K_P uncensored | Claude Code (Opus 5.5) |
+|---|---|---|---|---|---|
+| Runs on | local GPU | local GPU | local GPU | local GPU | cloud API |
+| Download size | 21.8 GB | 22.6 GB | 20.8 GB | 26.1 GB | – |
+| Base tasks T1–T5 passed | 5/5 | 5/5 | 4/5 | 5/5 | 5/5 |
+| Base tasks total time | 580s | 597s | 588s | 1565s | 128s |
+| Web + vision tasks passed | – | 4/5 | – | – | 5/5 |
+| Browser tasks passed | not run yet | not run yet | – | – | 2/2 |
+| Decode @ 4.9K / 174K context | 45.9 / 29.0 t/s | 44.7 / 28.2 | 45.2 / 28.2 | 40.5 / 26.2 | – |
+| Prefill @ 41.6K | 1729 t/s | 1686 | 1898 | 996 | – |
+| Peak llama-server RAM | 19.3 GB | 22.5 GB¹ | 18.9 GB | 20.7 GB | – |
+| Cost | electricity | electricity | electricity | electricity | $2.14 base, $2.86 base+web+vision |
+| Behaviour notes | used Grep after being told not to (T5) | wrote a list instead of a count (W2) | CLI bug it never ran (T4) | one 32K-token thinking loop (T5) | parallel reads, checks its own work |
+| Pick it when | daily driver, text only | daily driver (default `run-q4.bat`) | checking whether a failure comes from the uncensor | not worth it on 32GB RAM | speed matters or the local model gets stuck |
+
+¹ Measured with `--cache-ram 8192`; vision mode now defaults to 6144, which should save ~2GB (not re-measured).
+
 ### Speed
 
 | Context | Q4_K_P uncensored | Q4_K_P + vision (mmproj) | UD-Q4_K_XL original | Q5_K_P uncensored |
@@ -33,6 +52,8 @@ Local models run through `opencode run`; Claude runs through `claude -p` (Claude
 | V1 image → data | read a Vietnamese order table from a PNG into exact JSON | | ✅ 48s | | | ✅ 12s · $0.11 |
 | V2 chart | read a bar chart without value labels (max, min, two values ±5) | | ✅ 32s | | | ✅ 9s · $0.09 |
 | V3 mockup → HTML | rebuild a login form from a PNG (all texts, inputs, checkbox, red button) | | ✅ 68s | | | ✅ 36s · $0.17 |
+| B1 browser console | open a broken page with chrome-devtools, read console + DOM, fix 2 bugs; graded in headless Chrome, then re-graded with different data (no hard-coding) | | not run yet | | | ✅ 26s · $0.18 |
+| B2 hidden 404 | a `try/catch` swallows the error; find the missing script via network log / `initScript`, fix the path | | not run yet | | | ✅ 42s · $0.23 |
 
 1. Discount logic right, but `cli.py` referenced an undefined `args` variable and the model never ran the CLI.
 2. Read all 24 files, then used Grep to double-check despite being told not to.
@@ -41,7 +62,7 @@ Local models run through `opencode run`; Claude runs through `claude -p` (Claude
 
 Zero tool-call JSON parse errors across all runs. Claude's full 10-task run cost $2.86 and took ~4 minutes. Raw outputs: [`bench/results/`](bench/results/).
 
-**Takeaway:** Q4_K_P is the sweet spot on 32GB RAM, and vision (images via `opencode run -f img.png` or pasted into the TUI) works with little speed cost. Q5 halves prefill speed and leaves ~5GB RAM free without a measurable quality gain in these tasks. Claude Code is ~3–6x faster end to end and passed everything, at ~$0.10–0.30 per small task and ~$1.4 for a 145K-token read. Treat single-run differences as anecdotal.
+**Takeaway:** Q4_K_P is the sweet spot on 32GB RAM, and vision (tested via `opencode run -f img.png`) works with little speed cost. Q5 halves prefill speed and leaves ~5GB RAM free without a measurable quality gain in these tasks. Claude Code is ~3–6x faster end to end and passed everything, at ~$0.10–0.30 per small task and ~$1.4 for a 145K-token read. Treat single-run differences as anecdotal.
 
 ## Setup
 
@@ -54,7 +75,7 @@ Zero tool-call JSON parse errors across all runs. Claude's full 10-task run cost
    ```
 3. **Run**: double-click `run-q4.bat` (Q4 + vision, the default) or `run-q4-text.bat` (no mmproj), `run-q5.bat`, `run-orig.bat`. Ready when the log says `listening on http://127.0.0.1:8080`. If a server is already running, the script says which model and exits; `-Force` replaces it.
 4. **OpenCode**: `npm i -g opencode-ai`, copy [`opencode.example.json`](opencode.example.json) to `%USERPROFILE%\.config\opencode\opencode.json`, then run `opencode` in your project and pick the model with `/models`.
-5. **Benchmark** (optional): `python bench/bench.py q4 orig q5` (base tasks + speed), `python bench/bench.py q4v --tasks web,vision`, or `python bench/bench.py claude --tasks all` (needs Claude Code; ~$3). It starts/stops the server itself.
+5. **Benchmark** (optional): `python bench/bench.py q4 orig q5` (base tasks + speed), `python bench/bench.py q4v --tasks web,vision`, `python bench/bench.py q4v --tasks browser --reuse-server` (uses the server you already have running), or `python bench/bench.py claude --tasks all` (needs Claude Code; ~$3.30). It starts/stops the server itself unless `--reuse-server`. Browser tasks use an isolated headless Chrome (`bench/opencode.bench.json`, `bench/mcp-chrome.claude.json`) so they don't touch your own profile.
 
 ## Browser debugging (chrome-devtools-mcp)
 

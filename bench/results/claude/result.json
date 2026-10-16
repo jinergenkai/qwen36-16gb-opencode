@@ -121,6 +121,30 @@
       "models": [
         "claude-opus-5-5"
       ]
+    },
+    {
+      "task": "B1_console_fix",
+      "pass": true,
+      "seconds": 26,
+      "detail": "với data khác: Total: 13",
+      "cost_usd": 0.1830948,
+      "turns": 13,
+      "api_s": 20,
+      "models": [
+        "claude-opus-5-5"
+      ]
+    },
+    {
+      "task": "B2_hidden_404",
+      "pass": true,
+      "seconds": 42,
+      "detail": "cument.getElementById('chart'), [3, 1, 4]); } catch (e) { console.error('MiniChart draw failed:', e); document.getElementById('chart').textContent = 'Không vẽ được biểu đồ'; }</script> </body></html> ",
+      "cost_usd": 0.2289092,
+      "turns": 14,
+      "api_s": 37,
+      "models": [
+        "claude-opus-5-5"
+      ]
     }
   ]
 }
