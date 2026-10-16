@@ -7,10 +7,10 @@ param(
     [ValidateSet('q4', 'q5', 'orig')] [string]$Model = 'q4',
     [int]$Ctx = 262144,
     [int]$FitTarget = 1024,   # MiB of VRAM left free for Windows. OOM -> raise to 1536
-    [int]$CacheRam = -2,      # MiB of RAM for the prompt cache. Default: 8192 (q4/orig), 4096 (q5, RAM is tight)
+    [int]$CacheRam = -2,      # MiB of RAM for the prompt cache. Default: 8192, 6144 with -Vision (mmproj ~1GB), 4096 for q5
     [switch]$Vision
 )
-if ($CacheRam -eq -2) { $CacheRam = if ($Model -eq 'q5') { 4096 } else { 8192 } }
+if ($CacheRam -eq -2) { $CacheRam = if ($Model -eq 'q5') { 4096 } elseif ($Vision) { 6144 } else { 8192 } }
 
 $root = $PSScriptRoot
 $models = @{

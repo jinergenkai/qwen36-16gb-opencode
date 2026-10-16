@@ -52,7 +52,7 @@ Zero tool-call JSON parse errors across all runs. Claude's full 10-task run cost
    .\download-all.ps1          # Q4 uncensored + fixed chat template (~22GB)
    .\download-all.ps1 -All     # + original Q4, vision mmproj, Q5 (~70GB total)
    ```
-3. **Run**: double-click `run-q4.bat` (or `run-q4-vision.bat`, `run-q5.bat`, `run-orig.bat`). Ready when the log says `listening on http://127.0.0.1:8080`.
+3. **Run**: double-click `run-q4.bat` (Q4 + vision, the default) or `run-q4-text.bat` (no mmproj), `run-q5.bat`, `run-orig.bat`. Ready when the log says `listening on http://127.0.0.1:8080`.
 4. **OpenCode**: `npm i -g opencode-ai`, copy [`opencode.example.json`](opencode.example.json) to `%USERPROFILE%\.config\opencode\opencode.json`, then run `opencode` in your project and pick the model with `/models`.
 5. **Benchmark** (optional): `python bench/bench.py q4 orig q5` (base tasks + speed), `python bench/bench.py q4v --tasks web,vision`, or `python bench/bench.py claude --tasks all` (needs Claude Code; ~$3). It starts/stops the server itself.
 
@@ -64,7 +64,7 @@ Zero tool-call JSON parse errors across all runs. Claude's full 10-task run cost
 | `-c 262144 --fit on --fit-ctx 262144` | Full native context. Without `--fit-ctx`, `--fit` silently shrinks context to fit. Only 10 of 40 layers use full attention, so KV cache for 262K is ~2.7GB at q8. |
 | `--fit-target 1024` | Leave ~1GB VRAM for Windows so the driver never spills into shared memory (silent 2x slowdown). |
 | `--load-mode none` | With mmap, the whole 22GB file stayed in the process working set (RAM free: 0.6GB). Without it: 14GB, and prefill went from ~700 to ~1600 t/s. |
-| `--cache-ram 8192` (4096 for Q5) | The prompt cache lives in RAM and grew the server by ~5GB over the benchmark. |
+| `--cache-ram 8192` (6144 with vision, 4096 for Q5) | The prompt cache lives in RAM and grew the server by ~5GB over the benchmark. |
 | `-ctk q8_0 -ctv q8_0` | Near-lossless; q4 K-cache hurts tool-call reliability. |
 | `-np 1` | One user; extra slots cost recurrent-state memory. |
 | `preserve_thinking` | Qwen3.6 is trained to keep previous reasoning across tool turns. |
