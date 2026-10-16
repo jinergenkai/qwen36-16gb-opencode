@@ -33,5 +33,12 @@
       }
     }
   },
+  "mcp": {
+    "chrome-devtools": {
+      "type": "local",
+      "command": ["cmd", "/c", "npx", "-y", "chrome-devtools-mcp@1.11.0", "--no-usage-statistics"],
+      "enabled": true
+    }
+  },
   "model": "llama.cpp/qwen36-uncensored-q4"
 }

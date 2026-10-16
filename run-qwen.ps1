@@ -8,8 +8,23 @@ param(
     [int]$Ctx = 262144,
     [int]$FitTarget = 1024,   # MiB of VRAM left free for Windows. OOM -> raise to 1536
     [int]$CacheRam = -2,      # MiB of RAM for the prompt cache. Default: 8192, 6144 with -Vision (mmproj ~1GB), 4096 for q5
-    [switch]$Vision
+    [switch]$Vision,
+    [switch]$Force            # stop a running llama-server and start this one instead
 )
+
+# Don't start a second server: two copies would fight over VRAM/RAM and port 8080.
+$running = Get-Process llama-server -ErrorAction SilentlyContinue
+if ($running) {
+    $current = try { (Invoke-RestMethod http://127.0.0.1:8080/v1/models -TimeoutSec 3).data[0].id } catch { '(still loading)' }
+    if (-not $Force) {
+        Write-Host "llama-server is already running (PID $($running.Id -join ', '), model: $current)." -ForegroundColor Yellow
+        Write-Host "Use it as is, stop it with Ctrl+C in its window, or rerun with -Force to replace it."
+        exit 0
+    }
+    Write-Host "Stopping running llama-server ($current)..." -ForegroundColor Yellow
+    $running | Stop-Process -Force
+    Start-Sleep 3
+}
 if ($CacheRam -eq -2) { $CacheRam = if ($Model -eq 'q5') { 4096 } elseif ($Vision) { 6144 } else { 8192 } }
 
 $root = $PSScriptRoot

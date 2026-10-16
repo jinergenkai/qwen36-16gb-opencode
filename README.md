@@ -52,9 +52,24 @@ Zero tool-call JSON parse errors across all runs. Claude's full 10-task run cost
    .\download-all.ps1          # Q4 uncensored + fixed chat template (~22GB)
    .\download-all.ps1 -All     # + original Q4, vision mmproj, Q5 (~70GB total)
    ```
-3. **Run**: double-click `run-q4.bat` (Q4 + vision, the default) or `run-q4-text.bat` (no mmproj), `run-q5.bat`, `run-orig.bat`. Ready when the log says `listening on http://127.0.0.1:8080`.
+3. **Run**: double-click `run-q4.bat` (Q4 + vision, the default) or `run-q4-text.bat` (no mmproj), `run-q5.bat`, `run-orig.bat`. Ready when the log says `listening on http://127.0.0.1:8080`. If a server is already running, the script says which model and exits; `-Force` replaces it.
 4. **OpenCode**: `npm i -g opencode-ai`, copy [`opencode.example.json`](opencode.example.json) to `%USERPROFILE%\.config\opencode\opencode.json`, then run `opencode` in your project and pick the model with `/models`.
 5. **Benchmark** (optional): `python bench/bench.py q4 orig q5` (base tasks + speed), `python bench/bench.py q4v --tasks web,vision`, or `python bench/bench.py claude --tasks all` (needs Claude Code; ~$3). It starts/stops the server itself.
+
+## Browser debugging (chrome-devtools-mcp)
+
+`opencode.example.json` registers [chrome-devtools-mcp](https://github.com/ChromeDevTools/chrome-devtools-mcp), which gives the model the same toolbox as Chrome DevTools: open/navigate pages, `evaluate_script`, `initScript` on `navigate_page` (JS that runs **before** the page's own scripts), console and network logs, snapshots, screenshots, performance traces. Check it with `opencode mcp list`.
+
+Smoke test with Q4: open a local page with an `initScript` setting a flag, read the DOM, list console errors, explain the bug. All three right in 86s:
+
+```
+⚙ chrome-devtools_navigate_page {"type":"reload","initScript":"window.__flag = true"}
+⚙ chrome-devtools_evaluate_script {"function":"() => document.getElementById('t')?.textContent"}
+⚙ chrome-devtools_list_console_messages {"types":["error","warn"]}
+→ h1 = "INIT OK", error: Uncaught ReferenceError: undefinedFn is not defined
+```
+
+Chosen over Playwright MCP because it covers debugging (console, network, performance, source maps) rather than test automation, and the model can pick a different init script per navigation instead of a fixed file. To drive your own Chrome profile instead of a fresh one, add `--autoConnect` (Chrome 144+, enable remote debugging at `chrome://inspect/#remote-debugging`).
 
 ## Why these flags
 
